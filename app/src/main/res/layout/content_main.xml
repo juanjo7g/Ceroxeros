@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="com.juan.electrocontrolapp.MainActivity"
+    tools:showIn="@layout/app_bar_main">
+
+    <TextView
+        android:id="@+id/tvModo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:text="Modo" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fabModoA"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/tvModo"
+        android:layout_gravity="bottom|end"
+        android:layout_marginLeft="37dp"
+        android:layout_marginTop="16dp"
+        android:src="@drawable/ic_swap_calls_white_24dp" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fabModoB"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/fabModoA"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="bottom|end"
+        android:src="@drawable/ic_trending_up_white_24dp" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fabModoC"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@+id/fabModoB"
+        android:layout_gravity="bottom|end"
+        android:layout_marginRight="37dp"
+        android:src="@drawable/ic_autorenew_white_24dp" />
+
+    <TextView
+        android:id="@+id/tvIntensidad"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/fabModoA"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        android:text="Intensidad" />
+
+    <android.support.v7.widget.AppCompatSeekBar
+        android:id="@+id/sbIntensidad"
+        android:layout_width="207dp"
+        android:progressDrawable="@drawable/custom_progress_bar"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tvIntensidad"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_marginTop="107dp"
+        android:max="100"
+        android:progress="40"
+        android:rotation="270" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fabDisminuirIntensidad"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/sbIntensidad"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="bottom|end"
+        android:layout_marginBottom="14dp"
+        android:layout_marginLeft="77dp"
+        android:layout_marginTop="107dp"
+        android:src="@drawable/ic_remove_white_24dp"
+        app:fabSize="mini" />
+
+    <View
+        android:layout_width="1dp"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/fabDisminuirIntensidad"
+        android:layout_alignTop="@+id/fabDisminuirIntensidad"
+        android:layout_centerHorizontal="true"
+        android:background="@color/colorDivider" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fabAumentarIntensidad"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@+id/fabDisminuirIntensidad"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="bottom|end"
+        android:layout_marginBottom="14dp"
+        android:layout_marginRight="77dp"
+        android:src="@drawable/ic_add_white_24dp"
+        app:fabSize="mini" />
+</RelativeLayout>
