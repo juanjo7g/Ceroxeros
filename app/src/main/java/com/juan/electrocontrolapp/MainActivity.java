@@ -1,7 +1,12 @@
 package com.juan.electrocontrolapp;
 
 import android.annotation.TargetApi;
+import android.app.ProgressDialog;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.LinearGradient;
 import android.graphics.Shader;
@@ -9,6 +14,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RectShape;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -28,6 +34,11 @@ import android.view.MenuItem;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
+import com.juan.electrocontrolapp.bluetooth.BluetoothActivity;
+
+import java.io.IOException;
+import java.util.UUID;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -39,6 +50,14 @@ public class MainActivity extends AppCompatActivity
     private SeekBar sbIntensidad;
     private String modo;
     private String intensidad;
+
+    String address = null;
+    private ProgressDialog progress;
+    BluetoothAdapter myBluetooth = null;
+    BluetoothSocket btSocket = null;
+    private boolean isBtConnected = false;
+    //SPP UUID. Look for it
+    static final UUID myUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
 
     @Override
@@ -130,6 +149,15 @@ public class MainActivity extends AppCompatActivity
 
         modo = "A";
         mostrarMensajeConfiguracionActual();
+
+        if (btSocket!=null){
+            try{
+                btSocket.getOutputStream().write(modo.getBytes());
+            }catch (IOException e)
+            {
+                Toast.makeText(MainActivity.this, "Error", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     private void activarModoB() {
@@ -139,6 +167,15 @@ public class MainActivity extends AppCompatActivity
 
         modo = "B";
         mostrarMensajeConfiguracionActual();
+
+        if (btSocket!=null){
+            try{
+                btSocket.getOutputStream().write(modo.getBytes());
+            }catch (IOException e)
+            {
+                Toast.makeText(MainActivity.this, "Error", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     private void activarModoC() {
@@ -148,6 +185,15 @@ public class MainActivity extends AppCompatActivity
 
         modo = "C";
         mostrarMensajeConfiguracionActual();
+
+        if (btSocket!=null){
+            try{
+                btSocket.getOutputStream().write(modo.getBytes());
+            }catch (IOException e)
+            {
+                Toast.makeText(MainActivity.this, "Error", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
 
@@ -227,17 +273,19 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_bluetooth) {
-            new AlertDialog.Builder(this)
-                    .setTitle("Configuración conexión bluetooth")
-                    .setMessage("Seleccionar dispositivo bluetooth.......")
-                    .setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            item.setIcon(R.drawable.ic_bluetooth_connected_white_24dp);
-                            Toast.makeText(MainActivity.this, "Dispositivo conectado con éxito.", Toast.LENGTH_SHORT).show();
-                        }
-                    })
-                    .setIcon(R.drawable.ic_info_outline_black_24dp)
-                    .show();
+//            new AlertDialog.Builder(this)
+//                    .setTitle("Configuración conexión bluetooth")
+//                    .setMessage("Seleccionar dispositivo bluetooth.......")
+//                    .setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+//                        public void onClick(DialogInterface dialog, int which) {
+//                            item.setIcon(R.drawable.ic_bluetooth_connected_white_24dp);
+//                            Toast.makeText(MainActivity.this, "Dispositivo conectado con éxito.", Toast.LENGTH_SHORT).show();
+//                        }
+//                    })
+//                    .setIcon(R.drawable.ic_info_outline_black_24dp)
+//                    .show();
+            Intent i = new Intent(MainActivity.this, BluetoothActivity.class);
+            startActivityForResult(i, 1);
             return true;
         }
 
@@ -267,5 +315,57 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Toast.makeText(MainActivity.this, "Llego la mac " + data.getExtras().get("address"), Toast.LENGTH_SHORT).show();
+
+        address = data.getExtras().get("address") + "";
+
+        new ConnectBT().execute(); //Call the class to connect
+
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private class ConnectBT extends AsyncTask<Void, Void, Void>  // UI thread
+    {
+        private boolean ConnectSuccess = true; //if it's here, it's almost connected
+
+        @Override
+        protected void onPreExecute() {
+            progress = ProgressDialog.show(MainActivity.this, "Connecting...", "Please wait!!!");  //show a progress dialog
+        }
+
+        @Override
+        protected Void doInBackground(Void... devices) //while the progress dialog is shown, the connection is done in background
+        {
+            try {
+                if (btSocket == null || !isBtConnected) {
+                    myBluetooth = BluetoothAdapter.getDefaultAdapter();//get the mobile bluetooth device
+                    BluetoothDevice dispositivo = myBluetooth.getRemoteDevice(address);//connects to the device's address and checks if it's available
+                    btSocket = dispositivo.createInsecureRfcommSocketToServiceRecord(myUUID);//create a RFCOMM (SPP) connection
+                    BluetoothAdapter.getDefaultAdapter().cancelDiscovery();
+                    btSocket.connect();//start connection
+                }
+            } catch (IOException e) {
+                ConnectSuccess = false;//if the try failed, you can check the exception here
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) //after the doInBackground, it checks if everything went fine
+        {
+            super.onPostExecute(result);
+
+            if (!ConnectSuccess) {
+                Toast.makeText(getApplicationContext(), "Falló la conexión", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(getApplicationContext(), "Conectado con éxito", Toast.LENGTH_SHORT).show();
+                isBtConnected = true;
+            }
+            progress.dismiss();
+        }
     }
 }
