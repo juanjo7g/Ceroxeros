@@ -50,6 +50,7 @@ public class MainActivity extends AppCompatActivity
     private SeekBar sbIntensidad;
     private String modo;
     private String intensidad;
+    private MenuItem menuItemBotonBluetooth;
 
     String address = null;
     private ProgressDialog progress;
@@ -139,6 +140,16 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        inicializarConexion();
+
+    }
+
+    private void inicializarConexion() {
+        // Obtener mac de la base de datos local
+        String mac = null;
+        if (mac != null) {
+            new ConnectBT().execute();
+        }
     }
 
     private void activarModoA() {
@@ -150,14 +161,7 @@ public class MainActivity extends AppCompatActivity
         modo = "A";
         mostrarMensajeConfiguracionActual();
 
-        if (btSocket!=null){
-            try{
-                btSocket.getOutputStream().write(modo.getBytes());
-            }catch (IOException e)
-            {
-                Toast.makeText(MainActivity.this, "Error", Toast.LENGTH_SHORT).show();
-            }
-        }
+        enviarStringBluetooth(modo);
     }
 
     private void activarModoB() {
@@ -168,14 +172,7 @@ public class MainActivity extends AppCompatActivity
         modo = "B";
         mostrarMensajeConfiguracionActual();
 
-        if (btSocket!=null){
-            try{
-                btSocket.getOutputStream().write(modo.getBytes());
-            }catch (IOException e)
-            {
-                Toast.makeText(MainActivity.this, "Error", Toast.LENGTH_SHORT).show();
-            }
-        }
+        enviarStringBluetooth(modo);
     }
 
     private void activarModoC() {
@@ -186,14 +183,7 @@ public class MainActivity extends AppCompatActivity
         modo = "C";
         mostrarMensajeConfiguracionActual();
 
-        if (btSocket!=null){
-            try{
-                btSocket.getOutputStream().write(modo.getBytes());
-            }catch (IOException e)
-            {
-                Toast.makeText(MainActivity.this, "Error", Toast.LENGTH_SHORT).show();
-            }
-        }
+        enviarStringBluetooth(modo);
     }
 
 
@@ -204,7 +194,10 @@ public class MainActivity extends AppCompatActivity
         }
         actualizaColores();
         mostrarMensajeConfiguracionActual();
+
+        enviarStringBluetooth("+");
     }
+
 
     private void disminuirIntensidad() {
         if (Integer.parseInt(intensidad) > 0) {
@@ -213,6 +206,8 @@ public class MainActivity extends AppCompatActivity
         }
         actualizaColores();
         mostrarMensajeConfiguracionActual();
+
+        enviarStringBluetooth("-");
     }
 
     private void actualizaColores() {
@@ -270,7 +265,8 @@ public class MainActivity extends AppCompatActivity
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
+        menuItemBotonBluetooth = item;
+        
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_bluetooth) {
 //            new AlertDialog.Builder(this)
@@ -319,13 +315,26 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Toast.makeText(MainActivity.this, "Llego la mac " + data.getExtras().get("address"), Toast.LENGTH_SHORT).show();
 
-        address = data.getExtras().get("address") + "";
-
-        new ConnectBT().execute(); //Call the class to connect
+        if (data != null && data.getExtras() != null && data.getExtras().get("address") != null) {
+            Toast.makeText(MainActivity.this, "Llego la mac " + data.getExtras().get("address"), Toast.LENGTH_SHORT).show();
+            address = data.getExtras().get("address") + "";
+            new ConnectBT().execute(); //Call the class to connect
+        } else {
+            Toast.makeText(MainActivity.this, "No llego mac", Toast.LENGTH_SHORT).show();
+        }
 
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void enviarStringBluetooth(String s) {
+        if (btSocket != null && s != null) {
+            try {
+                btSocket.getOutputStream().write(s.getBytes());
+            } catch (IOException e) {
+                Toast.makeText(MainActivity.this, "Error", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     private class ConnectBT extends AsyncTask<Void, Void, Void>  // UI thread
@@ -334,7 +343,7 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         protected void onPreExecute() {
-            progress = ProgressDialog.show(MainActivity.this, "Connecting...", "Please wait!!!");  //show a progress dialog
+            progress = ProgressDialog.show(MainActivity.this, "Conectando...", "Por favor espere");  //show a progress dialog
         }
 
         @Override
@@ -361,9 +370,11 @@ public class MainActivity extends AppCompatActivity
 
             if (!ConnectSuccess) {
                 Toast.makeText(getApplicationContext(), "Falló la conexión", Toast.LENGTH_SHORT).show();
+                menuItemBotonBluetooth.setIcon(getResources().getDrawable(R.drawable.ic_settings_bluetooth_white_24dp));
             } else {
                 Toast.makeText(getApplicationContext(), "Conectado con éxito", Toast.LENGTH_SHORT).show();
                 isBtConnected = true;
+                menuItemBotonBluetooth.setIcon(getResources().getDrawable(R.drawable.ic_bluetooth_connected_white_24dp));
             }
             progress.dismiss();
         }
