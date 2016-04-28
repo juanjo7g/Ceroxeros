@@ -7,7 +7,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.juan.electrocontrolapp.bluetooth.BluetoothActivity">
+    tools:context=".view.activity.BluetoothActivity">
 
     <TextView
         android:id="@+id/textView"

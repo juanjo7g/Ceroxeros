@@ -1,26 +1,18 @@
-package com.juan.electrocontrolapp;
+package com.juan.electrocontrolapp.view.activity;
 
-import android.annotation.TargetApi;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.ColorStateList;
-import android.graphics.LinearGradient;
-import android.graphics.Shader;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.ShapeDrawable;
-import android.graphics.drawable.shapes.RectShape;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -34,7 +26,9 @@ import android.view.MenuItem;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
-import com.juan.electrocontrolapp.bluetooth.BluetoothActivity;
+import com.juan.electrocontrolapp.R;
+import com.juan.electrocontrolapp.view.fragments.IniciarSesionFragment;
+import com.juan.electrocontrolapp.view.fragments.MainFragment;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -68,6 +62,8 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        inicializarMainFragment();
+
 //        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
 //        fab.setOnClickListener(new View.OnClickListener() {
 //            @Override
@@ -77,60 +73,60 @@ public class MainActivity extends AppCompatActivity
 //            }
 //        });
 
-        fabModoA = (FloatingActionButton) findViewById(R.id.fabModoA);
-        fabModoB = (FloatingActionButton) findViewById(R.id.fabModoB);
-        fabModoC = (FloatingActionButton) findViewById(R.id.fabModoC);
-        fabAumentarIntensidad = (FloatingActionButton) findViewById(R.id.fabAumentarIntensidad);
-        fabDisminuirIntensidad = (FloatingActionButton) findViewById(R.id.fabDisminuirIntensidad);
-        sbIntensidad = (SeekBar) findViewById(R.id.sbIntensidad);
-
-        fabModoA.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.colorAccent)));
-        fabModoB.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.colorSecondaryText)));
-        fabModoC.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.colorSecondaryText)));
-
-        modo = "A";
-        intensidad = "45";
-
-        fabModoA.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                activarModoA();
-            }
-        });
-        fabModoB.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                activarModoB();
-            }
-        });
-        fabModoC.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                activarModoC();
-            }
-        });
-
-        fabAumentarIntensidad.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                aumentarIntensidad();
-            }
-        });
-        fabDisminuirIntensidad.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                disminuirIntensidad();
-            }
-        });
-
-        // No permite modificar el seekbar al tocarlo
-        sbIntensidad.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                return true;
-            }
-        });
-
+//        fabModoA = (FloatingActionButton) findViewById(R.id.fabModoA);
+//        fabModoB = (FloatingActionButton) findViewById(R.id.fabModoB);
+//        fabModoC = (FloatingActionButton) findViewById(R.id.fabModoC);
+//        fabAumentarIntensidad = (FloatingActionButton) findViewById(R.id.fabAumentarIntensidad);
+//        fabDisminuirIntensidad = (FloatingActionButton) findViewById(R.id.fabDisminuirIntensidad);
+//        sbIntensidad = (SeekBar) findViewById(R.id.sbIntensidad);
+//
+//        fabModoA.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.colorAccent)));
+//        fabModoB.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.colorSecondaryText)));
+//        fabModoC.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.colorSecondaryText)));
+//
+//        modo = "A";
+//        intensidad = "45";
+//
+//        fabModoA.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                activarModoA();
+//            }
+//        });
+//        fabModoB.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                activarModoB();
+//            }
+//        });
+//        fabModoC.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                activarModoC();
+//            }
+//        });
+//
+//        fabAumentarIntensidad.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                aumentarIntensidad();
+//            }
+//        });
+//        fabDisminuirIntensidad.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                disminuirIntensidad();
+//            }
+//        });
+//
+//        // No permite modificar el seekbar al tocarlo
+//        sbIntensidad.setOnTouchListener(new View.OnTouchListener() {
+//            @Override
+//            public boolean onTouch(View v, MotionEvent event) {
+//                return true;
+//            }
+//        });
+//
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -139,13 +135,22 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
-        inicializarConexion();
+//
+//        inicializarConexion();
 
     }
 
+    private void inicializarMainFragment() {
+        Fragment fragment = null;
+        fragment = new MainFragment();
+
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.content_frame, fragment)
+                .commit();
+    }
+
     private void inicializarConexion() {
-        // Obtener mac de la base de datos local
+        //Todo: Obtener mac de la base de datos local
         String mac = null;
         if (mac != null) {
             new ConnectBT().execute();
@@ -266,7 +271,7 @@ public class MainActivity extends AppCompatActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         menuItemBotonBluetooth = item;
-        
+
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_bluetooth) {
 //            new AlertDialog.Builder(this)
@@ -294,10 +299,22 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
+//        DrawerLayout drawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
+//        NavigationView navView = (NavigationView)findViewById(R.id.navview);
 
+        boolean fragmentTransaction = false;
+        Fragment fragment = null;
+        fragment = new MainFragment();
+        fragmentTransaction = true;
+
+        if (id == R.id.nav_camera) {
+            fragment = new MainFragment();
+            fragmentTransaction = true;
+            Log.i("id", id + "");
+        } else if (id == R.id.nav_gallery) {
+            fragment = new IniciarSesionFragment();
+            fragmentTransaction = true;
+            Log.i("id", id + "");
         } else if (id == R.id.nav_slideshow) {
 
         } else if (id == R.id.nav_manage) {
@@ -307,7 +324,14 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_send) {
 
         }
+        if (fragmentTransaction) {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.content_frame, fragment)
+                    .commit();
 
+            item.setChecked(true);
+            getSupportActionBar().setTitle(item.getTitle());
+        }
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
