@@ -36,14 +36,6 @@ import java.util.UUID;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private FloatingActionButton fabModoA;
-    private FloatingActionButton fabModoB;
-    private FloatingActionButton fabModoC;
-    private FloatingActionButton fabAumentarIntensidad;
-    private FloatingActionButton fabDisminuirIntensidad;
-    private SeekBar sbIntensidad;
-    private String modo;
-    private String intensidad;
     private MenuItem menuItemBotonBluetooth;
 
     String address = null;
@@ -64,69 +56,6 @@ public class MainActivity extends AppCompatActivity
 
         inicializarMainFragment();
 
-//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-//            }
-//        });
-
-//        fabModoA = (FloatingActionButton) findViewById(R.id.fabModoA);
-//        fabModoB = (FloatingActionButton) findViewById(R.id.fabModoB);
-//        fabModoC = (FloatingActionButton) findViewById(R.id.fabModoC);
-//        fabAumentarIntensidad = (FloatingActionButton) findViewById(R.id.fabAumentarIntensidad);
-//        fabDisminuirIntensidad = (FloatingActionButton) findViewById(R.id.fabDisminuirIntensidad);
-//        sbIntensidad = (SeekBar) findViewById(R.id.sbIntensidad);
-//
-//        fabModoA.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.colorAccent)));
-//        fabModoB.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.colorSecondaryText)));
-//        fabModoC.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.colorSecondaryText)));
-//
-//        modo = "A";
-//        intensidad = "45";
-//
-//        fabModoA.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                activarModoA();
-//            }
-//        });
-//        fabModoB.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                activarModoB();
-//            }
-//        });
-//        fabModoC.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                activarModoC();
-//            }
-//        });
-//
-//        fabAumentarIntensidad.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                aumentarIntensidad();
-//            }
-//        });
-//        fabDisminuirIntensidad.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                disminuirIntensidad();
-//            }
-//        });
-//
-//        // No permite modificar el seekbar al tocarlo
-//        sbIntensidad.setOnTouchListener(new View.OnTouchListener() {
-//            @Override
-//            public boolean onTouch(View v, MotionEvent event) {
-//                return true;
-//            }
-//        });
-//
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -135,8 +64,8 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-//
-//        inicializarConexion();
+
+        inicializarConexion();
 
     }
 
@@ -157,95 +86,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void activarModoA() {
-
-        fabModoA.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.colorAccent)));
-        fabModoB.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.colorSecondaryText)));
-        fabModoC.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.colorSecondaryText)));
-
-        modo = "A";
-        mostrarMensajeConfiguracionActual();
-
-        enviarStringBluetooth(modo);
-    }
-
-    private void activarModoB() {
-        fabModoA.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.colorSecondaryText)));
-        fabModoB.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.colorAccent)));
-        fabModoC.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.colorSecondaryText)));
-
-        modo = "B";
-        mostrarMensajeConfiguracionActual();
-
-        enviarStringBluetooth(modo);
-    }
-
-    private void activarModoC() {
-        fabModoA.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.colorSecondaryText)));
-        fabModoB.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.colorSecondaryText)));
-        fabModoC.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.colorAccent)));
-
-        modo = "C";
-        mostrarMensajeConfiguracionActual();
-
-        enviarStringBluetooth(modo);
-    }
-
-
-    private void aumentarIntensidad() {
-        if (Integer.parseInt(intensidad) < 100) {
-            intensidad = String.valueOf(Integer.parseInt(intensidad) + 5);
-            sbIntensidad.setProgress(Integer.parseInt(intensidad));
-        }
-        actualizaColores();
-        mostrarMensajeConfiguracionActual();
-
-        enviarStringBluetooth("+");
-    }
-
-
-    private void disminuirIntensidad() {
-        if (Integer.parseInt(intensidad) > 0) {
-            intensidad = String.valueOf(Integer.parseInt(intensidad) - 5);
-            sbIntensidad.setProgress(Integer.parseInt(intensidad));
-        }
-        actualizaColores();
-        mostrarMensajeConfiguracionActual();
-
-        enviarStringBluetooth("-");
-    }
-
-    private void actualizaColores() {
-        int intensidadInt = Integer.parseInt(intensidad);
-
-        if (intensidadInt + 5 >= 80) {
-            fabAumentarIntensidad.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.colorRed)));
-        }
-        if (intensidadInt + 5 >= 5 && intensidadInt + 5 <= 75) {
-            fabAumentarIntensidad.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.colorOrange)));
-        }
-        if (intensidadInt + 5 <= 45) {
-            fabAumentarIntensidad.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.colorGreen)));
-        }
-
-        if (intensidadInt - 5 >= 80) {
-            fabDisminuirIntensidad.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.colorRed)));
-        }
-        if (intensidadInt - 5 >= 5 && intensidadInt - 5 <= 75) {
-            fabDisminuirIntensidad.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.colorOrange)));
-        }
-        if (intensidadInt - 5 <= 45) {
-            fabDisminuirIntensidad.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.colorGreen)));
-        }
-    }
-
-
-    public void mostrarMensajeConfiguracionActual() {
-//        Toast.makeText(MainActivity.this, "Modo: " + modo + " Intensidad: " + intensidad, Toast.LENGTH_SHORT).show();
-        Float intensidadF = Float.parseFloat(intensidad) / 10;
-        Snackbar.make(findViewById(android.R.id.content), "Modo: " + modo + " Intensidad: " + intensidadF, Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show();
-    }
 
     @Override
     public void onBackPressed() {
@@ -272,19 +112,7 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
         menuItemBotonBluetooth = item;
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_bluetooth) {
-//            new AlertDialog.Builder(this)
-//                    .setTitle("Configuración conexión bluetooth")
-//                    .setMessage("Seleccionar dispositivo bluetooth.......")
-//                    .setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
-//                        public void onClick(DialogInterface dialog, int which) {
-//                            item.setIcon(R.drawable.ic_bluetooth_connected_white_24dp);
-//                            Toast.makeText(MainActivity.this, "Dispositivo conectado con éxito.", Toast.LENGTH_SHORT).show();
-//                        }
-//                    })
-//                    .setIcon(R.drawable.ic_info_outline_black_24dp)
-//                    .show();
             Intent i = new Intent(MainActivity.this, BluetoothActivity.class);
             startActivityForResult(i, 1);
             return true;
@@ -299,13 +127,8 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-//        DrawerLayout drawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
-//        NavigationView navView = (NavigationView)findViewById(R.id.navview);
-
         boolean fragmentTransaction = false;
         Fragment fragment = null;
-        fragment = new MainFragment();
-        fragmentTransaction = true;
 
         if (id == R.id.nav_camera) {
             fragment = new MainFragment();
@@ -351,16 +174,6 @@ public class MainActivity extends AppCompatActivity
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    private void enviarStringBluetooth(String s) {
-        if (btSocket != null && s != null) {
-            try {
-                btSocket.getOutputStream().write(s.getBytes());
-            } catch (IOException e) {
-                Toast.makeText(MainActivity.this, "Error", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
     private class ConnectBT extends AsyncTask<Void, Void, Void>  // UI thread
     {
         private boolean ConnectSuccess = true; //if it's here, it's almost connected
@@ -402,5 +215,9 @@ public class MainActivity extends AppCompatActivity
             }
             progress.dismiss();
         }
+    }
+
+    public BluetoothSocket getBtSocket(){
+        return btSocket;
     }
 }
