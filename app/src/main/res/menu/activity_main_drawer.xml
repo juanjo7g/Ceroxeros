@@ -3,34 +3,38 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_camera"
-            android:icon="@drawable/ic_menu_camera"
-            android:title="Import" />
-        <item
-            android:id="@+id/nav_gallery"
-            android:icon="@drawable/ic_menu_gallery"
-            android:title="Gallery" />
-        <item
-            android:id="@+id/nav_slideshow"
-            android:icon="@drawable/ic_menu_slideshow"
-            android:title="Slideshow" />
-        <item
-            android:id="@+id/nav_manage"
-            android:icon="@drawable/ic_menu_manage"
-            android:title="Tools" />
+            android:id="@+id/nav_configuracion_actual"
+            android:icon="@drawable/ic_settings_black_24dp"
+            android:title="Configuración Actual" />
     </group>
 
-    <item android:title="Communicate">
+
+    <item android:title="Configuraciones Favoritas">
         <menu>
-            <item
-                android:id="@+id/nav_share"
-                android:icon="@drawable/ic_menu_share"
-                android:title="Share" />
-            <item
-                android:id="@+id/nav_send"
-                android:icon="@drawable/ic_menu_send"
-                android:title="Send" />
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/nav_share"
+                    android:icon="@drawable/ic_star_black_24dp"
+                    android:title="Favorita 1" />
+                <item
+                    android:id="@+id/nav_send"
+                    android:icon="@drawable/ic_star_black_24dp"
+                    android:title="Favorita 2" />
+            </group>
         </menu>
     </item>
+
+    <group
+        android:id="@+id/group_configuraciones"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_iniciar_sesion"
+            android:icon="@drawable/ic_settings_black_24dp"
+            android:title="Iniciar Sesión" />
+        <item
+            android:id="@+id/nav_preferencias"
+            android:icon="@drawable/ic_settings_black_24dp"
+            android:title="Preferencias" />
+    </group>
 
 </menu>

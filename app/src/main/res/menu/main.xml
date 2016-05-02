@@ -8,6 +8,13 @@
     <!--app:showAsAction="never" />-->
 
     <item
+        android:id="@+id/action_favorito"
+        android:orderInCategory="100"
+        android:title="@string/action_agregar_favorito"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_star_border_white_24dp"/>
+
+    <item
         android:id="@+id/action_bluetooth"
         android:orderInCategory="100"
         android:title="@string/action_emparejar_bluetooth"
