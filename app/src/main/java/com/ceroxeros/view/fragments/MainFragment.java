@@ -1,24 +1,31 @@
-package com.juan.electrocontrolapp.view.fragments;
+package com.ceroxeros.view.fragments;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothSocket;
 import android.content.res.ColorStateList;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
+import com.ceroxeros.modelo.Configuracion;
+import com.j256.ormlite.dao.Dao;
 import com.juan.electrocontrolapp.R;
-import com.juan.electrocontrolapp.view.activity.MainActivity;
+import com.ceroxeros.view.activity.MainActivity;
 
 import java.io.IOException;
+import java.sql.SQLException;
+import java.util.Date;
 
 public class MainFragment extends Fragment {
 
@@ -33,6 +40,10 @@ public class MainFragment extends Fragment {
     private String intensidad;
 
     private MainActivity mainActivity;
+
+    private Boolean favorito = Boolean.FALSE;
+
+    private Dao dao;
 
     public MainFragment() {
 
@@ -102,6 +113,9 @@ public class MainFragment extends Fragment {
                 return true;
             }
         });
+
+        setHasOptionsMenu(true);
+
         return rootView;
     }
 
@@ -199,6 +213,56 @@ public class MainFragment extends Fragment {
             } catch (IOException e) {
                 Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
             }
+        }
+    }
+
+    // Para obter
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.main, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_favorito) {
+            if (favorito) {
+                item.setIcon(getResources().getDrawable(R.drawable.ic_star_border_white_24dp));
+                favorito = Boolean.FALSE;
+            } else {
+                new TaskGuardarConfiguracion().execute();
+                item.setIcon(getResources().getDrawable(R.drawable.ic_star_white_24dp));
+                favorito = Boolean.TRUE;
+            }
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private class TaskGuardarConfiguracion extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected void onPreExecute() {
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            Configuracion configuracion = null;
+            try {
+                dao = mainActivity.getHelper().getConfiguracionDao();
+                configuracion = new Configuracion();
+                configuracion.setIntensidad(Float.parseFloat(intensidad));
+                configuracion.setModo(modo);
+                configuracion.setFechaCreacion(new Date());
+                dao.create(configuracion);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+
         }
     }
 

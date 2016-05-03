@@ -1,4 +1,4 @@
-package com.juan.electrocontrolapp.view.fragments;
+package com.ceroxeros.view.fragments;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;

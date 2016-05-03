@@ -1,4 +1,4 @@
-package com.juan.electrocontrolapp.view.activity;
+package com.ceroxeros.view.activity;
 
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
@@ -19,9 +19,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.juan.electrocontrolapp.R;
-import com.juan.electrocontrolapp.view.fragments.IniciarSesionFragment;
-import com.juan.electrocontrolapp.view.fragments.MainFragment;
+import com.ceroxeros.helper.DBHelper;
+import com.ceroxeros.view.fragments.IniciarSesionFragment;
+import com.ceroxeros.view.fragments.MainFragment;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -38,7 +40,7 @@ public class MainActivity extends AppCompatActivity
     private boolean isBtConnected = false;
     //SPP UUID. Look for it
     static final UUID myUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
-
+    private DBHelper helper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,7 +80,6 @@ public class MainActivity extends AppCompatActivity
             new ConnectBT().execute();
         }
     }
-
 
     @Override
     public void onBackPressed() {
@@ -196,7 +197,7 @@ public class MainActivity extends AppCompatActivity
 
             if (!ConnectSuccess) {
                 Toast.makeText(getApplicationContext(), "Falló la conexión", Toast.LENGTH_SHORT).show();
-                menuItemBotonBluetooth.setIcon(getResources().getDrawable(R.drawable.ic_settings_bluetooth_white_24dp));
+                menuItemBotonBluetooth.setIcon(getResources().getDrawable(R.drawable.ic_bluetooth_disabled_white_24dp));
             } else {
                 Toast.makeText(getApplicationContext(), "Conectado con éxito", Toast.LENGTH_SHORT).show();
                 isBtConnected = true;
@@ -208,5 +209,21 @@ public class MainActivity extends AppCompatActivity
 
     public BluetoothSocket getBtSocket() {
         return btSocket;
+    }
+
+    public DBHelper getHelper() {
+        if (helper == null) {
+            helper = OpenHelperManager.getHelper(this, DBHelper.class);
+        }
+        return helper;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (helper != null) {
+            OpenHelperManager.releaseHelper();
+            helper = null;
+        }
     }
 }

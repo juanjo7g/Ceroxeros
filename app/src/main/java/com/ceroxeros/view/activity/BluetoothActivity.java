@@ -1,4 +1,4 @@
-package com.juan.electrocontrolapp.view.activity;
+package com.ceroxeros.view.activity;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;

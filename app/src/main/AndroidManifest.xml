@@ -12,7 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".view.activity.MainActivity"
+            android:name="com.ceroxeros.view.activity.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -21,7 +21,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".view.activity.BluetoothActivity"></activity>
+        <activity android:name="com.ceroxeros.view.activity.BluetoothActivity"></activity>
     </application>
 
 </manifest>
