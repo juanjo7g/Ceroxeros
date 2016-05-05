@@ -5,35 +5,40 @@
         <item
             android:id="@+id/nav_configuracion_actual"
             android:icon="@drawable/ic_settings_black_24dp"
+            android:orderInCategory="1"
             android:title="Configuración Actual" />
     </group>
 
 
-    <item android:title="Configuraciones Favoritas">
-        <menu>
-            <group android:checkableBehavior="single">
-                <item
-                    android:id="@+id/nav_share"
-                    android:icon="@drawable/ic_star_black_24dp"
-                    android:title="Favorita 1" />
-                <item
-                    android:id="@+id/nav_send"
-                    android:icon="@drawable/ic_star_black_24dp"
-                    android:title="Favorita 2" />
-            </group>
-        </menu>
-    </item>
+    <!--<item android:title="Configuraciones Favoritas">-->
+    <!--<menu>-->
+    <group
+        android:id="@+id/group_configuraciones_favoritas"
+        android:checkableBehavior="single">
+        <!--<item-->
+        <!--android:id="@+id/nav_share"-->
+        <!--android:icon="@drawable/ic_star_black_24dp"-->
+        <!--android:title="Favorita 1" />-->
+        <!--<item-->
+        <!--android:id="@+id/nav_send"-->
+        <!--android:icon="@drawable/ic_star_black_24dp"-->
+        <!--android:title="Favorita 2" />-->
+    </group>
+    <!--</menu>-->
+    <!--</item>-->
 
     <group
         android:id="@+id/group_configuraciones"
         android:checkableBehavior="single">
         <item
             android:id="@+id/nav_iniciar_sesion"
-            android:icon="@drawable/ic_settings_black_24dp"
+            android:icon="@drawable/ic_account_circle_black_24dp"
+            android:orderInCategory="3"
             android:title="Iniciar Sesión" />
         <item
             android:id="@+id/nav_preferencias"
             android:icon="@drawable/ic_settings_black_24dp"
+            android:orderInCategory="3"
             android:title="Preferencias" />
     </group>
 

@@ -17,15 +17,21 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.SubMenu;
 import android.widget.Toast;
 
+import com.ceroxeros.modelo.Configuracion;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
+import com.j256.ormlite.dao.Dao;
 import com.juan.electrocontrolapp.R;
 import com.ceroxeros.helper.DBHelper;
 import com.ceroxeros.view.fragments.IniciarSesionFragment;
 import com.ceroxeros.view.fragments.MainFragment;
 
 import java.io.IOException;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity
@@ -41,6 +47,7 @@ public class MainActivity extends AppCompatActivity
     //SPP UUID. Look for it
     static final UUID myUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     private DBHelper helper;
+    private Dao dao;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,10 +65,26 @@ public class MainActivity extends AppCompatActivity
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+
+        inicializarMenuLateral(navigationView);
 
         inicializarConexion();
 
+    }
+
+    private void inicializarMenuLateral(NavigationView navigationView) {
+        Menu menu = null;
+        SubMenu subMenuConfiguracionesFavoritas = null;
+        MenuItem itemConfiguracionesFavoritas = null;
+        if (navigationView != null) {
+            menu = navigationView.getMenu();
+            menu.getItem(0).setChecked(Boolean.TRUE);
+            subMenuConfiguracionesFavoritas = menu.addSubMenu(R.id.group_configuraciones_favoritas, Menu.NONE, 2, R.string.titulo_configuraciones_favoritas);
+            subMenuConfiguracionesFavoritas.setGroupCheckable(R.id.group_configuraciones_favoritas, Boolean.TRUE, Boolean.TRUE);
+            navigationView.setNavigationItemSelectedListener(this);
+//            Todo: Cargar configuraciones guardadas localmente.
+//            new TaskCargarConfiguraciones().execute();
+        }
     }
 
     private void inicializarMainFragment() {
@@ -91,12 +114,12 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        // Inflate the menu; this adds items to the action bar if it is present.
+//        getMenuInflater().inflate(R.menu.main, menu);
+//        return true;
+//    }
 
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
@@ -124,19 +147,16 @@ public class MainActivity extends AppCompatActivity
         boolean fragmentTransaction = false;
         Fragment fragment = null;
 
+        item.setChecked(true);
+
         if (id == R.id.nav_configuracion_actual) {
             fragment = new MainFragment();
             fragmentTransaction = true;
             Log.i("id", id + "");
-            item.setChecked(true);
         } else if (id == R.id.nav_iniciar_sesion) {
             fragment = new IniciarSesionFragment();
             fragmentTransaction = true;
             Log.i("id", id + "");
-        } else if (id == R.id.nav_share) {
-            item.setChecked(true);
-        } else if (id == R.id.nav_send) {
-            item.setChecked(true);
         }
         if (fragmentTransaction) {
             getSupportFragmentManager().beginTransaction()
@@ -224,6 +244,37 @@ public class MainActivity extends AppCompatActivity
         if (helper != null) {
             OpenHelperManager.releaseHelper();
             helper = null;
+        }
+    }
+
+    private class TaskCargarConfiguraciones extends AsyncTask<Void, Void, Void> {
+        List<Configuracion> listaConfiguraciones = null;
+        SubMenu subMenuConfiguracionesFavoritas;
+        MenuItem itemConfiguracionesFavoritas;
+
+        @Override
+        protected void onPreExecute() {
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            try {
+                dao = getHelper().getConfiguracionDao();
+                listaConfiguraciones = new ArrayList<>();
+
+                listaConfiguraciones = dao.queryForAll();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            itemConfiguracionesFavoritas = subMenuConfiguracionesFavoritas.add(R.id.group_configuraciones_favoritas, 1, 2, "Fav 1");
+            itemConfiguracionesFavoritas.setIcon(R.drawable.ic_star_black_24dp);
+            itemConfiguracionesFavoritas = subMenuConfiguracionesFavoritas.add(R.id.group_configuraciones_favoritas, 2, 2, "Fav 2");
+            itemConfiguracionesFavoritas.setIcon(R.drawable.ic_star_black_24dp);
         }
     }
 }

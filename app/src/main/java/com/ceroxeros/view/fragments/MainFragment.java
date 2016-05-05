@@ -240,13 +240,14 @@ public class MainFragment extends Fragment {
     }
 
     private class TaskGuardarConfiguracion extends AsyncTask<Void, Void, Void> {
+        Configuracion configuracion = null;
+
         @Override
         protected void onPreExecute() {
         }
 
         @Override
         protected Void doInBackground(Void... params) {
-            Configuracion configuracion = null;
             try {
                 dao = mainActivity.getHelper().getConfiguracionDao();
                 configuracion = new Configuracion();
@@ -262,8 +263,13 @@ public class MainFragment extends Fragment {
 
         @Override
         protected void onPostExecute(Void result) {
-
+            int idConfiguracion = configuracion.getIdLocal();
+            mostrarMensaje("Config " + idConfiguracion + " guardada");
         }
+    }
+
+    void mostrarMensaje(String s) {
+        Toast.makeText(getActivity(), s, Toast.LENGTH_SHORT).show();
     }
 
 }
