@@ -36,17 +36,31 @@ public class MainFragment extends Fragment {
     private FloatingActionButton fabDisminuirIntensidad;
     private SeekBar sbIntensidad;
 
-    private String modo;
-    private String intensidad;
-
     private MainActivity mainActivity;
 
-    private Boolean favorito = Boolean.FALSE;
+    private Boolean favorito;
 
     private Dao dao;
+    private Configuracion configuracion;
+
+    private MenuItem menuItemFavorito;
 
     public MainFragment() {
+        configuracion = new Configuracion();
+        configuracion.setIdLocal(-1);
+        favorito = Boolean.FALSE;
+    }
 
+    public MainFragment(Configuracion configuracion) {
+        this.configuracion = configuracion;
+        configuracion.setIdLocal(0);
+        favorito = Boolean.FALSE;
+    }
+
+    public MainFragment(int id) {
+        configuracion = new Configuracion();
+        configuracion.setIdLocal(id);
+        favorito = Boolean.TRUE;
     }
 
     @Override
@@ -67,28 +81,30 @@ public class MainFragment extends Fragment {
         fabDisminuirIntensidad = (FloatingActionButton) rootView.findViewById(R.id.fabDisminuirIntensidad);
         sbIntensidad = (SeekBar) rootView.findViewById(R.id.sbIntensidad);
 
-        fabModoA.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(rootView.getContext(), R.color.colorAccent)));
-        fabModoB.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(rootView.getContext(), R.color.colorSecondaryText)));
-        fabModoC.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(rootView.getContext(), R.color.colorSecondaryText)));
-
-        modo = "A";
-        intensidad = "45";
-
         fabModoA.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (configuracion.getIdLocal() > 0) {
+                    mainActivity.inicializarMainFragment(configuracion);
+                }
                 activarModoA();
             }
         });
         fabModoB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (configuracion.getIdLocal() > 0) {
+                    mainActivity.inicializarMainFragment(configuracion);
+                }
                 activarModoB();
             }
         });
         fabModoC.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (configuracion.getIdLocal() > 0) {
+                    mainActivity.inicializarMainFragment(configuracion);
+                }
                 activarModoC();
             }
         });
@@ -96,15 +112,37 @@ public class MainFragment extends Fragment {
         fabAumentarIntensidad.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (configuracion.getIdLocal() > 0) {
+                    mainActivity.inicializarMainFragment(configuracion);
+                }
                 aumentarIntensidad();
             }
         });
         fabDisminuirIntensidad.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (configuracion.getIdLocal() > 0) {
+                    mainActivity.inicializarMainFragment(configuracion);
+                }
                 disminuirIntensidad();
             }
         });
+        if (configuracion.getIdLocal() == -1) {
+            configuracion.setModo("a");
+            configuracion.setIntensidad(Float.parseFloat("45"));
+        }
+        if (configuracion.getIdLocal() > 0) {
+            try {
+                dao = mainActivity.getHelper().getConfiguracionDao();
+                configuracion = (Configuracion) dao.queryForId(configuracion.getIdLocal());
+                inicializarConfiguracion();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+
+        inicializarConfiguracion();
 
         // No permite modificar el seekbar al tocarlo
         sbIntensidad.setOnTouchListener(new View.OnTouchListener() {
@@ -119,16 +157,34 @@ public class MainFragment extends Fragment {
         return rootView;
     }
 
+    private void inicializarConfiguracion() {
+        if (configuracion != null) {
+            switch (configuracion.getModo().toLowerCase()) {
+                case "a":
+                    activarModoA();
+                    break;
+                case "b":
+                    activarModoB();
+                    break;
+                case "c":
+                    activarModoC();
+                    break;
+            }
+            sbIntensidad.setProgress(configuracion.getIntensidad().intValue());
+            //Todo: Enviar la intensidad.
+        }
+    }
+
     private void activarModoA() {
 
         fabModoA.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorAccent)));
         fabModoB.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorSecondaryText)));
         fabModoC.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorSecondaryText)));
 
-        modo = "A";
+        configuracion.setModo("a");
         mostrarMensajeConfiguracionActual();
 
-        enviarStringBluetooth(modo);
+        enviarStringBluetooth(configuracion.getModo());
     }
 
     private void activarModoB() {
@@ -136,10 +192,10 @@ public class MainFragment extends Fragment {
         fabModoB.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorAccent)));
         fabModoC.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorSecondaryText)));
 
-        modo = "B";
+        configuracion.setModo("b");
         mostrarMensajeConfiguracionActual();
 
-        enviarStringBluetooth(modo);
+        enviarStringBluetooth(configuracion.getModo());
     }
 
     private void activarModoC() {
@@ -147,17 +203,17 @@ public class MainFragment extends Fragment {
         fabModoB.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorSecondaryText)));
         fabModoC.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorAccent)));
 
-        modo = "C";
+        configuracion.setModo("c");
         mostrarMensajeConfiguracionActual();
 
-        enviarStringBluetooth(modo);
+        enviarStringBluetooth(configuracion.getModo());
     }
 
 
     private void aumentarIntensidad() {
-        if (Integer.parseInt(intensidad) < 100) {
-            intensidad = String.valueOf(Integer.parseInt(intensidad) + 5);
-            sbIntensidad.setProgress(Integer.parseInt(intensidad));
+        if (configuracion.getIntensidad().intValue() < 100) {
+            configuracion.setIntensidad(configuracion.getIntensidad() + 5);
+            sbIntensidad.setProgress(configuracion.getIntensidad().intValue());
         }
         actualizaColores();
         mostrarMensajeConfiguracionActual();
@@ -167,9 +223,9 @@ public class MainFragment extends Fragment {
 
 
     private void disminuirIntensidad() {
-        if (Integer.parseInt(intensidad) > 0) {
-            intensidad = String.valueOf(Integer.parseInt(intensidad) - 5);
-            sbIntensidad.setProgress(Integer.parseInt(intensidad));
+        if (configuracion.getIntensidad().intValue() > 0) {
+            configuracion.setIntensidad(configuracion.getIntensidad() - 5);
+            sbIntensidad.setProgress(configuracion.getIntensidad().intValue());
         }
         actualizaColores();
         mostrarMensajeConfiguracionActual();
@@ -177,7 +233,7 @@ public class MainFragment extends Fragment {
     }
 
     private void actualizaColores() {
-        int intensidadInt = Integer.parseInt(intensidad);
+        int intensidadInt = configuracion.getIntensidad().intValue();
 
         if (intensidadInt + 5 >= 80) {
             fabAumentarIntensidad.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorRed)));
@@ -201,8 +257,9 @@ public class MainFragment extends Fragment {
     }
 
     public void mostrarMensajeConfiguracionActual() {
-        Float intensidadF = Float.parseFloat(intensidad) / 10;
-        Toast.makeText(getContext(), "Modo: " + modo + " Intensidad: " + intensidadF, Toast.LENGTH_SHORT).show();
+        Float intensidadF = configuracion.getIntensidad() / 10;
+        Toast.makeText(getContext(), "Modo: " + configuracion.getModo()
+                + " Intensidad: " + intensidadF, Toast.LENGTH_SHORT).show();
     }
 
     private void enviarStringBluetooth(String s) {
@@ -220,6 +277,12 @@ public class MainFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.main, menu);
+        menuItemFavorito = menu.findItem(R.id.action_favorito);
+        if (favorito) {
+            menuItemFavorito.setIcon(R.drawable.ic_star_white_24dp);
+        } else {
+            menuItemFavorito.setIcon(R.drawable.ic_star_border_white_24dp);
+        }
     }
 
     @Override
@@ -227,6 +290,7 @@ public class MainFragment extends Fragment {
         int id = item.getItemId();
         if (id == R.id.action_favorito) {
             if (favorito) {
+                new TaskEliminarConfiguracion().execute();
                 item.setIcon(getResources().getDrawable(R.drawable.ic_star_border_white_24dp));
                 favorito = Boolean.FALSE;
             } else {
@@ -240,7 +304,7 @@ public class MainFragment extends Fragment {
     }
 
     private class TaskGuardarConfiguracion extends AsyncTask<Void, Void, Void> {
-        Configuracion configuracion = null;
+        Configuracion configuracionAGuardar = null;
 
         @Override
         protected void onPreExecute() {
@@ -250,11 +314,11 @@ public class MainFragment extends Fragment {
         protected Void doInBackground(Void... params) {
             try {
                 dao = mainActivity.getHelper().getConfiguracionDao();
-                configuracion = new Configuracion();
-                configuracion.setIntensidad(Float.parseFloat(intensidad));
-                configuracion.setModo(modo);
-                configuracion.setFechaCreacion(new Date());
-                dao.create(configuracion);
+                configuracionAGuardar = new Configuracion();
+                configuracionAGuardar.setIntensidad(configuracion.getIntensidad());
+                configuracionAGuardar.setModo(configuracion.getModo());
+                configuracionAGuardar.setFechaCreacion(new Date());
+                dao.create(configuracionAGuardar);
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -263,8 +327,33 @@ public class MainFragment extends Fragment {
 
         @Override
         protected void onPostExecute(Void result) {
-            int idConfiguracion = configuracion.getIdLocal();
+            int idConfiguracion = configuracionAGuardar.getIdLocal();
+            mainActivity.agregarConfiguracionFavoritaAlMenuLateral(configuracionAGuardar, true);
             mostrarMensaje("Config " + idConfiguracion + " guardada");
+        }
+    }
+
+    private class TaskEliminarConfiguracion extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected void onPreExecute() {
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            try {
+                dao = mainActivity.getHelper().getConfiguracionDao();
+                dao.deleteById(configuracion.getIdLocal());
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            mainActivity.eliminaraConfiguracionFavoritaMenuLateral(configuracion.getIdLocal());
+            mostrarMensaje("Config " + configuracion.getIdLocal() + " eliminada");
         }
     }
 

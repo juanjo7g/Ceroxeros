@@ -39,15 +39,20 @@ public class MainActivity extends AppCompatActivity
 
     private MenuItem menuItemBotonBluetooth;
 
-    String address = null;
+    private String address = null;
     private ProgressDialog progress;
-    BluetoothAdapter myBluetooth = null;
-    BluetoothSocket btSocket = null;
+    private BluetoothAdapter myBluetooth = null;
+    private BluetoothSocket btSocket = null;
     private boolean isBtConnected = false;
     //SPP UUID. Look for it
     static final UUID myUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     private DBHelper helper;
     private Dao dao;
+
+    private Menu menu;
+    private SubMenu subMenuConfiguracionesFavoritas;
+    private MenuItem itemConfiguracionesFavoritas;
+    private NavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,34 +61,31 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        inicializarMainFragment();
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
+        if (drawer != null) {
+            drawer.setDrawerListener(toggle);
+        }
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        if (navigationView != null) {
+            menu = navigationView.getMenu();
+        }
         inicializarMenuLateral(navigationView);
-
+        inicializarMainFragment();
         inicializarConexion();
 
     }
 
     private void inicializarMenuLateral(NavigationView navigationView) {
-        Menu menu = null;
-        SubMenu subMenuConfiguracionesFavoritas = null;
-        MenuItem itemConfiguracionesFavoritas = null;
         if (navigationView != null) {
-            menu = navigationView.getMenu();
-            menu.getItem(0).setChecked(Boolean.TRUE);
             subMenuConfiguracionesFavoritas = menu.addSubMenu(R.id.group_configuraciones_favoritas, Menu.NONE, 2, R.string.titulo_configuraciones_favoritas);
             subMenuConfiguracionesFavoritas.setGroupCheckable(R.id.group_configuraciones_favoritas, Boolean.TRUE, Boolean.TRUE);
             navigationView.setNavigationItemSelectedListener(this);
-//            Todo: Cargar configuraciones guardadas localmente.
-//            new TaskCargarConfiguraciones().execute();
+            new TaskCargarConfiguraciones().execute();
         }
     }
 
@@ -94,6 +96,41 @@ public class MainActivity extends AppCompatActivity
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.content_frame, fragment)
                 .commit();
+        menu.setGroupCheckable(R.id.group_configuraciones_favoritas, Boolean.TRUE, Boolean.TRUE);
+        menu.getItem(0).setChecked(Boolean.TRUE);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(R.string.app_name);
+        }
+    }
+
+    public void inicializarMainFragment(Configuracion configuracion) {
+        Fragment fragment = null;
+        fragment = new MainFragment(configuracion);
+
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.content_frame, fragment)
+                .commit();
+        menu.setGroupCheckable(R.id.group_configuraciones_favoritas, Boolean.TRUE, Boolean.TRUE);
+        menu.getItem(0).setChecked(Boolean.TRUE);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(R.string.app_name);
+        }
+    }
+
+
+    private void inicializarMainFragment(int id) {
+        Fragment fragment = null;
+        fragment = new MainFragment(id);
+
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.content_frame, fragment)
+                .commit();
+
+        menu.setGroupCheckable(R.id.group_configuraciones_favoritas, Boolean.TRUE, Boolean.TRUE);
+        menu.getItem(0).setChecked(Boolean.FALSE);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(menu.findItem(id).getTitle());
+        }
     }
 
     private void inicializarConexion() {
@@ -107,25 +144,16 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
+        if (drawer != null && drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
         }
     }
 
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        // Inflate the menu; this adds items to the action bar if it is present.
-//        getMenuInflater().inflate(R.menu.main, menu);
-//        return true;
-//    }
 
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         menuItemBotonBluetooth = item;
 
@@ -141,32 +169,32 @@ public class MainActivity extends AppCompatActivity
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        boolean fragmentTransaction = false;
         Fragment fragment = null;
-
+        menu.setGroupCheckable(R.id.group_configuraciones_favoritas, Boolean.TRUE, Boolean.TRUE);
         item.setChecked(true);
 
         if (id == R.id.nav_configuracion_actual) {
             fragment = new MainFragment();
-            fragmentTransaction = true;
-            Log.i("id", id + "");
         } else if (id == R.id.nav_iniciar_sesion) {
             fragment = new IniciarSesionFragment();
-            fragmentTransaction = true;
-            Log.i("id", id + "");
+        } else if (id == R.id.nav_preferencias) {
+            fragment = new IniciarSesionFragment();
+        } else {
+            fragment = new MainFragment(id);
         }
-        if (fragmentTransaction) {
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.content_frame, fragment)
-                    .commit();
 
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.content_frame, fragment)
+                .commit();
+        if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(item.getTitle());
         }
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
+        if (drawer != null) {
+            drawer.closeDrawer(GravityCompat.START);
+        }
         return true;
     }
 
@@ -182,6 +210,24 @@ public class MainActivity extends AppCompatActivity
         }
 
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    public void agregarConfiguracionFavoritaAlMenuLateral(Configuracion configuracion, Boolean inserta) {
+        int id = configuracion.getIdLocal();
+        itemConfiguracionesFavoritas = subMenuConfiguracionesFavoritas
+                .add(R.id.group_configuraciones_favoritas, id, 2, "Fav " + id);
+        itemConfiguracionesFavoritas.setIcon(R.drawable.ic_star_black_24dp);
+        subMenuConfiguracionesFavoritas.setGroupCheckable(R.id.group_configuraciones_favoritas, Boolean.TRUE, Boolean.TRUE);
+        if (inserta) {
+            inicializarMainFragment(configuracion.getIdLocal());
+        }
+
+    }
+
+
+    public void eliminaraConfiguracionFavoritaMenuLateral(int idLocal) {
+        subMenuConfiguracionesFavoritas.removeItem(idLocal);
+        inicializarMainFragment();
     }
 
     private class ConnectBT extends AsyncTask<Void, Void, Void>  // UI thread
@@ -247,10 +293,8 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private class TaskCargarConfiguraciones extends AsyncTask<Void, Void, Void> {
+    public class TaskCargarConfiguraciones extends AsyncTask<Void, Void, Void> {
         List<Configuracion> listaConfiguraciones = null;
-        SubMenu subMenuConfiguracionesFavoritas;
-        MenuItem itemConfiguracionesFavoritas;
 
         @Override
         protected void onPreExecute() {
@@ -261,7 +305,6 @@ public class MainActivity extends AppCompatActivity
             try {
                 dao = getHelper().getConfiguracionDao();
                 listaConfiguraciones = new ArrayList<>();
-
                 listaConfiguraciones = dao.queryForAll();
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -271,10 +314,15 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         protected void onPostExecute(Void result) {
-            itemConfiguracionesFavoritas = subMenuConfiguracionesFavoritas.add(R.id.group_configuraciones_favoritas, 1, 2, "Fav 1");
-            itemConfiguracionesFavoritas.setIcon(R.drawable.ic_star_black_24dp);
-            itemConfiguracionesFavoritas = subMenuConfiguracionesFavoritas.add(R.id.group_configuraciones_favoritas, 2, 2, "Fav 2");
-            itemConfiguracionesFavoritas.setIcon(R.drawable.ic_star_black_24dp);
+            Configuracion configuracion = null;
+            if (listaConfiguraciones != null && listaConfiguraciones.size() != 0) {
+                for (int i = 0; i < listaConfiguraciones.size(); i++) {
+                    configuracion = listaConfiguraciones.get(i);
+                    agregarConfiguracionFavoritaAlMenuLateral(configuracion, false);
+                }
+            }
         }
     }
+
+
 }
