@@ -273,10 +273,9 @@ public class MainFragment extends Fragment {
         }
     }
 
-    // Para obter
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.main, menu);
+        inflater.inflate(R.menu.menu_activity_main, menu);
         menuItemFavorito = menu.findItem(R.id.action_favorito);
         if (favorito) {
             menuItemFavorito.setIcon(R.drawable.ic_star_white_24dp);

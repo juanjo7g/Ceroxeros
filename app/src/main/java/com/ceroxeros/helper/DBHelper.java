@@ -3,6 +3,7 @@ package com.ceroxeros.helper;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.ceroxeros.modelo.Dispositivo;
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.support.ConnectionSource;
@@ -22,6 +23,7 @@ public class DBHelper extends OrmLiteSqliteOpenHelper {
 
     private Dao<Configuracion, Integer> configuracionDao;
     private Dao<Usuario, Integer> usuarioDao;
+    private Dao<Dispositivo, Integer> dispositivoDao;
 
     public DBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -32,6 +34,7 @@ public class DBHelper extends OrmLiteSqliteOpenHelper {
         try {
             TableUtils.createTable(connectionSource, Configuracion.class);
             TableUtils.createTable(connectionSource, Usuario.class);
+            TableUtils.createTable(connectionSource, Dispositivo.class);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -56,10 +59,18 @@ public class DBHelper extends OrmLiteSqliteOpenHelper {
         return usuarioDao;
     }
 
+    public Dao<Dispositivo, Integer> getDispositivoDao() throws SQLException {
+        if (dispositivoDao == null) {
+            dispositivoDao = getDao(Dispositivo.class);
+        }
+        return dispositivoDao;
+    }
+
     @Override
     public void close() {
         super.close();
         configuracionDao = null;
         usuarioDao = null;
+        dispositivoDao = null;
     }
 }

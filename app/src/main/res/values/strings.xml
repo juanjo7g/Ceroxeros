@@ -6,6 +6,7 @@
 
     <string name="action_settings">Settings</string>
     <string name="action_emparejar_bluetooth">Emparejar bluetooth</string>
+    <string name="action_emparejar_dispositivo">Emparejar dispositivo</string>
     <string name="button_text_load">Cargar</string>
     <string name="tv_text_paired_devices">Dispositivos emparejados</string>
 
