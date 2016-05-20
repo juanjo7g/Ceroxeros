@@ -252,6 +252,7 @@ public class MainActivity extends AppCompatActivity
                 }
             } catch (IOException e) {
                 ConnectSuccess = false;//if the try failed, you can check the exception here
+                Log.e("Error conexión", e.getMessage());
             }
             return null;
         }

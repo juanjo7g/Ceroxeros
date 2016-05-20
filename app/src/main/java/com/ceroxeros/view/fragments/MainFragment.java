@@ -6,6 +6,7 @@ import android.content.res.ColorStateList;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
@@ -258,8 +259,10 @@ public class MainFragment extends Fragment {
 
     public void mostrarMensajeConfiguracionActual() {
         Float intensidadF = configuracion.getIntensidad() / 10;
-        Toast.makeText(getContext(), "Modo: " + configuracion.getModo()
-                + " Intensidad: " + intensidadF, Toast.LENGTH_SHORT).show();
+        if (getView() != null) {
+            Snackbar.make(getView(), "Modo: " + configuracion.getModo() + " Intensidad: " + intensidadF,
+                    Snackbar.LENGTH_SHORT).show();
+        }
     }
 
     private void enviarStringBluetooth(String s) {
@@ -357,7 +360,10 @@ public class MainFragment extends Fragment {
     }
 
     void mostrarMensaje(String s) {
-        Toast.makeText(getActivity(), s, Toast.LENGTH_SHORT).show();
+//        Toast.makeText(getActivity(), s, Toast.LENGTH_SHORT).show();
+        if (getView() != null) {
+            Snackbar.make(getView(), s, Snackbar.LENGTH_LONG).show();
+        }
     }
 
 }
