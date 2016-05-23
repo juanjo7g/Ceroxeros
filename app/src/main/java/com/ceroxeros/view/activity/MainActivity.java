@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.support.design.widget.NavigationView;
@@ -21,8 +22,11 @@ import android.view.SubMenu;
 import android.widget.Toast;
 
 import com.ceroxeros.modelo.Configuracion;
+import com.ceroxeros.modelo.Dispositivo;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.Dao;
+import com.j256.ormlite.stmt.DeleteBuilder;
+import com.j256.ormlite.table.TableUtils;
 import com.juan.electrocontrolapp.R;
 import com.ceroxeros.helper.DBHelper;
 import com.ceroxeros.view.fragments.IniciarSesionFragment;
@@ -54,13 +58,14 @@ public class MainActivity extends AppCompatActivity
     private MenuItem itemConfiguracionesFavoritas;
     private NavigationView navigationView;
 
+    private Snackbar snackbarConexionBT;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -74,6 +79,9 @@ public class MainActivity extends AppCompatActivity
         if (navigationView != null) {
             menu = navigationView.getMenu();
         }
+
+        snackbarConexionBT = Snackbar.make(navigationView, "Sin dispositivo bluetooth conectado", Snackbar.LENGTH_INDEFINITE);
+        snackbarConexionBT.show();
         inicializarMenuLateral(navigationView);
         inicializarMainFragment();
         inicializarConexion();
@@ -101,6 +109,9 @@ public class MainActivity extends AppCompatActivity
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(R.string.app_name);
         }
+        if (btSocket == null) {
+            snackbarConexionBT.show();
+        }
     }
 
     public void inicializarMainFragment(Configuracion configuracion) {
@@ -114,6 +125,9 @@ public class MainActivity extends AppCompatActivity
         menu.getItem(0).setChecked(Boolean.TRUE);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(R.string.app_name);
+        }
+        if (btSocket == null) {
+            snackbarConexionBT.show();
         }
     }
 
@@ -131,11 +145,26 @@ public class MainActivity extends AppCompatActivity
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(menu.findItem(id).getTitle());
         }
+        if (btSocket == null) {
+            snackbarConexionBT.show();
+        }
     }
 
     private void inicializarConexion() {
-        //Todo: Obtener mac de la base de datos local
+        Dispositivo dispositivo = null;
+        List<Dispositivo> listaDispositivos = null;
         String mac = null;
+        try {
+            dao = getHelper().getDispositivoDao();
+            listaDispositivos = dao.queryForAll();
+            if (listaDispositivos.size() > 0) {
+                dispositivo = listaDispositivos.get(0);
+                mac = dispositivo.getMac();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
         if (mac != null) {
             new ConnectBT().execute();
         }
@@ -233,6 +262,8 @@ public class MainActivity extends AppCompatActivity
     private class ConnectBT extends AsyncTask<Void, Void, Void>  // UI thread
     {
         private boolean ConnectSuccess = true; //if it's here, it's almost connected
+        private Dispositivo dispositivoActual = null;
+        private List<Dispositivo> listaDispositivos = null;
 
         @Override
         protected void onPreExecute() {
@@ -263,11 +294,29 @@ public class MainActivity extends AppCompatActivity
             super.onPostExecute(result);
 
             if (!ConnectSuccess) {
+                btSocket = null;
                 Toast.makeText(getApplicationContext(), "Falló la conexión", Toast.LENGTH_SHORT).show();
+                snackbarConexionBT.show();
                 menuItemBotonBluetooth.setIcon(getResources().getDrawable(R.drawable.ic_bluetooth_disabled_white_24dp));
             } else {
                 Toast.makeText(getApplicationContext(), "Conectado con éxito", Toast.LENGTH_SHORT).show();
                 isBtConnected = true;
+                try {
+                    dao = getHelper().getDispositivoDao();
+                    listaDispositivos = new ArrayList<>();
+                    listaDispositivos = dao.queryForAll();
+                    if (listaDispositivos.size() > 0) {
+                        dao.delete(listaDispositivos);
+                    }
+                    dispositivoActual = new Dispositivo();
+                    dispositivoActual.setMac(address);
+                    dispositivoActual.setUsuario(null);
+                    dao.create(dispositivoActual);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+                snackbarConexionBT.dismiss();
                 menuItemBotonBluetooth.setIcon(getResources().getDrawable(R.drawable.ic_bluetooth_connected_white_24dp));
             }
             progress.dismiss();

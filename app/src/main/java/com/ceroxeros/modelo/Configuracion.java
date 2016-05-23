@@ -23,7 +23,7 @@ public class Configuracion {
     public static final String ELIMINADO = "eliminado";
     public static final String SINCRONIZADO = "sincronizado";
 
-    @DatabaseField(generatedId = true, columnName = ID_LOCAL)
+    @DatabaseField(generatedId = true, allowGeneratedIdInsert = true, columnName = ID_LOCAL)
     private int idLocal;
     @DatabaseField(columnName = ID_REMOTO)
     private String idRemoto;

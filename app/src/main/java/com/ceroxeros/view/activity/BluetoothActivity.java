@@ -46,11 +46,7 @@ public class BluetoothActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bluetooth);
 
-        //Calling widgets
-        btnLoadPairedDevices = (Button) findViewById(R.id.btnLoadPairedDevices);
         devicelist = (ListView) findViewById(R.id.lvPairedDevices);
-
-        //if the device has bluetooth
         myBluetooth = BluetoothAdapter.getDefaultAdapter();
 
         if (myBluetooth == null) {
@@ -65,13 +61,7 @@ public class BluetoothActivity extends AppCompatActivity {
             startActivityForResult(turnBTon, 1);
         }
 
-        btnLoadPairedDevices.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                pairedDevicesList();
-            }
-        });
-
+        pairedDevicesList();
     }
 
     private void pairedDevicesList() {
@@ -126,9 +116,12 @@ public class BluetoothActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_emparejar_dispositivo) {
-
             return true;
         }
+        if (id == R.id.action_refrescar){
+            pairedDevicesList();
+        }
+
 
         return super.onOptionsItemSelected(item);
     }

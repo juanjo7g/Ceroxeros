@@ -129,8 +129,9 @@ public class MainFragment extends Fragment {
             }
         });
         if (configuracion.getIdLocal() == -1) {
-            configuracion.setModo("a");
-            configuracion.setIntensidad(Float.parseFloat("45"));
+            // TODO: Cargar ultima configuración
+            configuracion.setModo("A");
+            configuracion.setIntensidad(Float.parseFloat("0"));
         }
         if (configuracion.getIdLocal() > 0) {
             try {
@@ -172,7 +173,7 @@ public class MainFragment extends Fragment {
                     break;
             }
             sbIntensidad.setProgress(configuracion.getIntensidad().intValue());
-            //Todo: Enviar la intensidad.
+            enviarStringBluetooth(configuracion.getIntensidad() + "");
         }
     }
 
@@ -182,9 +183,9 @@ public class MainFragment extends Fragment {
         fabModoB.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorSecondaryText)));
         fabModoC.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorSecondaryText)));
 
-        configuracion.setModo("a");
-        mostrarMensajeConfiguracionActual();
-
+        configuracion.setModo("A");
+        //mostrarMensajeConfiguracionActual();
+        guardarUltimaConfiguracion();
         enviarStringBluetooth(configuracion.getModo());
     }
 
@@ -193,9 +194,9 @@ public class MainFragment extends Fragment {
         fabModoB.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorAccent)));
         fabModoC.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorSecondaryText)));
 
-        configuracion.setModo("b");
-        mostrarMensajeConfiguracionActual();
-
+        configuracion.setModo("B");
+        //mostrarMensajeConfiguracionActual();
+        guardarUltimaConfiguracion();
         enviarStringBluetooth(configuracion.getModo());
     }
 
@@ -204,33 +205,54 @@ public class MainFragment extends Fragment {
         fabModoB.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorSecondaryText)));
         fabModoC.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorAccent)));
 
-        configuracion.setModo("c");
-        mostrarMensajeConfiguracionActual();
-
+        configuracion.setModo("C");
+        //mostrarMensajeConfiguracionActual();
+        guardarUltimaConfiguracion();
         enviarStringBluetooth(configuracion.getModo());
     }
 
 
     private void aumentarIntensidad() {
         if (configuracion.getIntensidad().intValue() < 100) {
-            configuracion.setIntensidad(configuracion.getIntensidad() + 5);
+            configuracion.setIntensidad(configuracion.getIntensidad() + 10);
             sbIntensidad.setProgress(configuracion.getIntensidad().intValue());
         }
         actualizaColores();
-        mostrarMensajeConfiguracionActual();
-
-        enviarStringBluetooth("+");
+        //mostrarMensajeConfiguracionActual();
+        guardarUltimaConfiguracion();
+        enviarStringBluetooth(configuracion.getIntensidad() + "");
     }
 
 
     private void disminuirIntensidad() {
         if (configuracion.getIntensidad().intValue() > 0) {
-            configuracion.setIntensidad(configuracion.getIntensidad() - 5);
+            configuracion.setIntensidad(configuracion.getIntensidad() - 10);
             sbIntensidad.setProgress(configuracion.getIntensidad().intValue());
         }
         actualizaColores();
-        mostrarMensajeConfiguracionActual();
-        enviarStringBluetooth("-");
+        //mostrarMensajeConfiguracionActual();
+        guardarUltimaConfiguracion();
+        enviarStringBluetooth(configuracion.getIntensidad() + "");
+    }
+//todo:
+    private void guardarUltimaConfiguracion() {
+//        Configuracion ultimaConfiguracion = null;
+//        try {
+//            dao = mainActivity.getHelper().getConfiguracionDao();
+//            ultimaConfiguracion = new Configuracion();
+//            ultimaConfiguracion = (Configuracion) dao.queryForId(-1);
+//
+//            ultimaConfiguracion.setModo(configuracion.getModo());
+//            ultimaConfiguracion.setIntensidad(configuracion.getIntensidad());
+//            if (ultimaConfiguracion != null) {
+//                dao.update(ultimaConfiguracion);
+//            } else {
+//                ultimaConfiguracion.setIdLocal(-1);
+//                dao.create(ultimaConfiguracion);
+//            }
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
     }
 
     private void actualizaColores() {
@@ -269,7 +291,9 @@ public class MainFragment extends Fragment {
         BluetoothSocket btSocket = mainActivity.getBtSocket();
         if (btSocket != null && s != null) {
             try {
+                s = s.toLowerCase();
                 btSocket.getOutputStream().write(s.getBytes());
+                mostrarMensajeConfiguracionActual();
             } catch (IOException e) {
                 Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
             }

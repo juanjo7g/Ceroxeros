@@ -30,7 +30,7 @@
             android:layout_gravity="bottom|end"
             android:layout_marginLeft="37dp"
             android:layout_marginTop="16dp"
-            android:src="@drawable/ic_swap_calls_white_24dp" />
+            android:src="@drawable/ic_a_white" />
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/fabModoB"
@@ -39,7 +39,7 @@
             android:layout_alignTop="@+id/fabModoA"
             android:layout_centerHorizontal="true"
             android:layout_gravity="bottom|end"
-            android:src="@drawable/ic_trending_up_white_24dp" />
+            android:src="@drawable/ic_b_white" />
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/fabModoC"
@@ -50,7 +50,7 @@
             android:layout_alignTop="@+id/fabModoB"
             android:layout_gravity="bottom|end"
             android:layout_marginRight="37dp"
-            android:src="@drawable/ic_autorenew_white_24dp" />
+            android:src="@drawable/ic_c_white" />
 
         <TextView
             android:id="@+id/tvIntensidad"

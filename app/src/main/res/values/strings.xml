@@ -10,8 +10,8 @@
     <string name="button_text_load">Cargar</string>
     <string name="tv_text_paired_devices">Dispositivos emparejados</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="action_agregar_favorito">Agregar a favorito</string>
     <string name="titulo_configuraciones_favoritas">Configuraciones Favoritas</string>
+    <string name="action_refrescar">Refrescar</string>
 </resources>
