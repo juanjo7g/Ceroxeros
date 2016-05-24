@@ -116,4 +116,9 @@ public class Configuracion {
     public void setSincronizado(Boolean sincronizado) {
         this.sincronizado = sincronizado;
     }
+
+    @Override
+    public String toString() {
+        return "Modo: " + getModo() + " Intensidad: " + getIntensidad();
+    }
 }

@@ -243,12 +243,14 @@ public class MainActivity extends AppCompatActivity
 
     public void agregarConfiguracionFavoritaAlMenuLateral(Configuracion configuracion, Boolean inserta) {
         int id = configuracion.getIdLocal();
-        itemConfiguracionesFavoritas = subMenuConfiguracionesFavoritas
-                .add(R.id.group_configuraciones_favoritas, id, 2, "Fav " + id);
-        itemConfiguracionesFavoritas.setIcon(R.drawable.ic_star_black_24dp);
-        subMenuConfiguracionesFavoritas.setGroupCheckable(R.id.group_configuraciones_favoritas, Boolean.TRUE, Boolean.TRUE);
-        if (inserta) {
-            inicializarMainFragment(configuracion.getIdLocal());
+        if (id != -1) {
+            itemConfiguracionesFavoritas = subMenuConfiguracionesFavoritas
+                    .add(R.id.group_configuraciones_favoritas, id, 2, "Fav " + id);
+            itemConfiguracionesFavoritas.setIcon(R.drawable.ic_star_black_24dp);
+            subMenuConfiguracionesFavoritas.setGroupCheckable(R.id.group_configuraciones_favoritas, Boolean.TRUE, Boolean.TRUE);
+            if (inserta) {
+                inicializarMainFragment(configuracion.getIdLocal());
+            }
         }
 
     }

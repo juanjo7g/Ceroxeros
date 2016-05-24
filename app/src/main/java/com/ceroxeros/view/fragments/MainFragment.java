@@ -9,6 +9,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -130,22 +131,30 @@ public class MainFragment extends Fragment {
         });
         if (configuracion.getIdLocal() == -1) {
             // TODO: Cargar ultima configuración
-            configuracion.setModo("A");
-            configuracion.setIntensidad(Float.parseFloat("0"));
+            try {
+                dao = mainActivity.getHelper().getConfiguracionDao();
+                configuracion = (Configuracion) dao.queryForId(-1);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            if (configuracion == null) {
+                configuracion = new Configuracion();
+                configuracion.setIdLocal(-1);
+                configuracion.setModo("A");
+                configuracion.setIntensidad((float) 0);
+            }
         }
         if (configuracion.getIdLocal() > 0) {
             try {
                 dao = mainActivity.getHelper().getConfiguracionDao();
                 configuracion = (Configuracion) dao.queryForId(configuracion.getIdLocal());
-                inicializarConfiguracion();
+                Log.d("iD:::", configuracion.getIdLocal()+"");
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
-
-
+        Log.e("id::::::", configuracion.getIdLocal()+"");
         inicializarConfiguracion();
-
         // No permite modificar el seekbar al tocarlo
         sbIntensidad.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -230,29 +239,22 @@ public class MainFragment extends Fragment {
             sbIntensidad.setProgress(configuracion.getIntensidad().intValue());
         }
         actualizaColores();
-        //mostrarMensajeConfiguracionActual();
+//        mostrarMensajeConfiguracionActual();
         guardarUltimaConfiguracion();
         enviarStringBluetooth(configuracion.getIntensidad() + "");
     }
-//todo:
+
     private void guardarUltimaConfiguracion() {
-//        Configuracion ultimaConfiguracion = null;
-//        try {
-//            dao = mainActivity.getHelper().getConfiguracionDao();
-//            ultimaConfiguracion = new Configuracion();
-//            ultimaConfiguracion = (Configuracion) dao.queryForId(-1);
-//
-//            ultimaConfiguracion.setModo(configuracion.getModo());
-//            ultimaConfiguracion.setIntensidad(configuracion.getIntensidad());
-//            if (ultimaConfiguracion != null) {
-//                dao.update(ultimaConfiguracion);
-//            } else {
-//                ultimaConfiguracion.setIdLocal(-1);
-//                dao.create(ultimaConfiguracion);
-//            }
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
+        mostrarMensaje("Config: " + configuracion.toString());
+        Configuracion ultimaConfiguracion = null;
+        try {
+            ultimaConfiguracion = configuracion;
+            ultimaConfiguracion.setIdLocal(-1);
+            dao = mainActivity.getHelper().getConfiguracionDao();
+            dao.createOrUpdate(ultimaConfiguracion);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     private void actualizaColores() {
