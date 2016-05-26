@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "655263396827",
+    "project_id": "ceroxeros"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:655263396827:android:eba1fcf0e3436854",
+        "android_client_info": {
+          "package_name": "com.juan.electrocontrolapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "655263396827-1pusulj79qc2ldhctg5jdnsaj0lblrls.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.juan.electrocontrolapp",
+            "certificate_hash": "249086C3CD5159607C1EF4D298580D85575FFFAF"
+          }
+        },
+        {
+          "client_id": "655263396827-shk4en1m5222gu1i1pfautjc6ega0g89.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA9oyo1pVyuC9feZgHsf2IveyxktLPgN1k"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

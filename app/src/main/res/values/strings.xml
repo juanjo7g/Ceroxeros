@@ -14,4 +14,6 @@
     <string name="action_agregar_favorito">Agregar a favorito</string>
     <string name="titulo_configuraciones_favoritas">Configuraciones Favoritas</string>
     <string name="action_refrescar">Refrescar</string>
+    <string name="facebook_app_id">1488888527803999</string>
+    <string name="signed_in_fmt">Signed in as: %s</string>
 </resources>
