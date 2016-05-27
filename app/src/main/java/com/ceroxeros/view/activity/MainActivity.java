@@ -243,7 +243,7 @@ public class MainActivity extends AppCompatActivity
 
     public void agregarConfiguracionFavoritaAlMenuLateral(Configuracion configuracion, Boolean inserta) {
         int id = configuracion.getIdLocal();
-        if (id != -1) {
+        if (id != -1 && !configuracion.getEliminado()) {
             itemConfiguracionesFavoritas = subMenuConfiguracionesFavoritas
                     .add(R.id.group_configuraciones_favoritas, id, 2, "Fav " + id);
             itemConfiguracionesFavoritas.setIcon(R.drawable.ic_star_black_24dp);

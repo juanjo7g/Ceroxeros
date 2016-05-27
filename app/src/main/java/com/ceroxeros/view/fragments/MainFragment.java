@@ -129,8 +129,16 @@ public class MainFragment extends Fragment {
                 disminuirIntensidad();
             }
         });
+        // No permite modificar el seekbar al tocarlo
+        sbIntensidad.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return true;
+            }
+        });
+        setHasOptionsMenu(true);
+
         if (configuracion.getIdLocal() == -1) {
-            // TODO: Cargar ultima configuración
             try {
                 dao = mainActivity.getHelper().getConfiguracionDao();
                 configuracion = (Configuracion) dao.queryForId(-1);
@@ -148,22 +156,11 @@ public class MainFragment extends Fragment {
             try {
                 dao = mainActivity.getHelper().getConfiguracionDao();
                 configuracion = (Configuracion) dao.queryForId(configuracion.getIdLocal());
-                Log.d("iD:::", configuracion.getIdLocal()+"");
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
-        Log.e("id::::::", configuracion.getIdLocal()+"");
         inicializarConfiguracion();
-        // No permite modificar el seekbar al tocarlo
-        sbIntensidad.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                return true;
-            }
-        });
-
-        setHasOptionsMenu(true);
 
         return rootView;
     }
@@ -245,10 +242,11 @@ public class MainFragment extends Fragment {
     }
 
     private void guardarUltimaConfiguracion() {
-        mostrarMensaje("Config: " + configuracion.toString());
         Configuracion ultimaConfiguracion = null;
         try {
-            ultimaConfiguracion = configuracion;
+            ultimaConfiguracion = new Configuracion();
+            ultimaConfiguracion.setModo(configuracion.getModo());
+            ultimaConfiguracion.setIntensidad(configuracion.getIntensidad());
             ultimaConfiguracion.setIdLocal(-1);
             dao = mainActivity.getHelper().getConfiguracionDao();
             dao.createOrUpdate(ultimaConfiguracion);
@@ -371,7 +369,8 @@ public class MainFragment extends Fragment {
         protected Void doInBackground(Void... params) {
             try {
                 dao = mainActivity.getHelper().getConfiguracionDao();
-                dao.deleteById(configuracion.getIdLocal());
+                configuracion.setEliminado(true);
+                dao.update(configuracion);
             } catch (SQLException e) {
                 e.printStackTrace();
             }
