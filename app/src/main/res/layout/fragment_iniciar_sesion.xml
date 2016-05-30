@@ -12,27 +12,35 @@
         android:layout_gravity="center_horizontal"
         android:text="@string/hello_blank_fragment" />
 
-    <com.facebook.login.widget.LoginButton
-        android:id="@+id/login_button"
-        android:layout_width="wrap_content"
+    <Button
+        android:layout_width="170dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="150dp"
-        android:layout_marginBottom="30dp" />
+        android:id="@+id/btnSignOut"
+        android:layout_gravity="center_horizontal|bottom"
+        android:layout_marginTop="260dp"
+        android:text="Sign out"/>
 
     <com.google.android.gms.common.SignInButton
         android:id="@+id/sign_in_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
+        android:layout_gravity="center"
         android:layout_marginTop="200dp"
         android:layout_marginBottom="30dp"/>
+
+    <com.facebook.login.widget.LoginButton
+        android:id="@+id/login_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="150dp"
+        android:layout_marginBottom="30dp" />
+
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/btnSignOut"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="260dp"
-        android:text="Sign out"/>
+        android:text="Crear Usuario"
+        android:id="@+id/buttonCrearUsuario"
+        android:layout_gravity="center" />
 
 </FrameLayout>

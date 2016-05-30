@@ -8,8 +8,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
+import com.ceroxeros.view.activity.CrearUsuarioActivity;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
@@ -48,6 +50,8 @@ public class IniciarSesionFragment extends Fragment implements GoogleApiClient.O
     private GoogleApiClient mGoogleApiClient;
 
     private static final int RC_SIGN_IN = 9001;
+
+    private Button buttonCrearUsuario;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -143,6 +147,14 @@ public class IniciarSesionFragment extends Fragment implements GoogleApiClient.O
         signInButton.setSize(SignInButton.SIZE_STANDARD);
         signInButton.setScopes(gso.getScopeArray());
 
+        buttonCrearUsuario = (Button) view.findViewById(R.id.buttonCrearUsuario);
+        buttonCrearUsuario.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(getActivity(), CrearUsuarioActivity.class);
+                startActivity(i);
+            }
+        });
         return view;
     }
 

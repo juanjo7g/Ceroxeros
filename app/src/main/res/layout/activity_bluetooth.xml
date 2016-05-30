@@ -9,19 +9,67 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.ceroxeros.view.activity.BluetoothActivity">
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:text="@string/tv_text_paired_devices" />
-
     <ListView
         android:id="@+id/lvPairedDevices"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/textView"
         android:layout_centerHorizontal="true" />
+
+    <RelativeLayout
+        android:id="@+id/viewSinDispositivosEmparejados"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="invisible">
+
+        <ImageView
+            android:id="@+id/imageViewIcon"
+            android:layout_width="170dp"
+            android:layout_height="130dp"
+            android:layout_centerHorizontal="true"
+            android:adjustViewBounds="true"
+            android:src="@mipmap/ic_phonelink_off_gray" />
+
+        <TextView
+            android:id="@+id/textViewSinDispositivos"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/imageViewIcon"
+            android:layout_centerInParent="true"
+            android:text="Sin dispositivos."
+            android:textColor="@color/colorGray" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/textViewSinDispositivos"
+            android:layout_centerInParent="true"
+            android:text="Persione el botón '+' para emparejar dispositivos."
+            android:textColor="@color/colorGray" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/viewBluetoothDesactivado"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="invisible">
+
+        <ImageView
+            android:id="@+id/imageViewIconBT"
+            android:layout_width="170dp"
+            android:layout_height="130dp"
+            android:layout_centerHorizontal="true"
+            android:adjustViewBounds="true"
+            android:src="@mipmap/ic_bluetooth_off_gray" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/imageViewIconBT"
+            android:layout_centerInParent="true"
+            android:text="Bluetooth Desactivado"
+            android:textColor="@color/colorGray" />
+    </RelativeLayout>
+
 </RelativeLayout>

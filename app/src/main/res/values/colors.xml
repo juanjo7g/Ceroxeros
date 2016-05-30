@@ -11,4 +11,5 @@
     <color name="colorOrange">#F57C00</color>
     <color name="colorGreen">#4CAF50</color>
     <color name="colorWhite">#FFFFFF</color>
+    <color name="colorGray">#9E9E9E</color>
 </resources>

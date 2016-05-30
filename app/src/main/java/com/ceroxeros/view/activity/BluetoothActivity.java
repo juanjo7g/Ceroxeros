@@ -3,15 +3,14 @@ package com.ceroxeros.view.activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,8 +23,7 @@ import java.util.Set;
 public class BluetoothActivity extends AppCompatActivity {
 
     //widgets
-    Button btnLoadPairedDevices;
-    ListView devicelist;
+    private ListView devicelist;
     //Bluetooth
     private BluetoothAdapter myBluetooth = null;
     private Set<BluetoothDevice> pairedDevices;
@@ -46,6 +44,13 @@ public class BluetoothActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bluetooth);
 
+        ActionBar actionBar = ((AppCompatActivity) this).getSupportActionBar();
+
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white_24dp);
+        }
+
         devicelist = (ListView) findViewById(R.id.lvPairedDevices);
         myBluetooth = BluetoothAdapter.getDefaultAdapter();
 
@@ -60,8 +65,7 @@ public class BluetoothActivity extends AppCompatActivity {
             Intent turnBTon = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(turnBTon, 1);
         }
-
-        pairedDevicesList();
+        setTitle("Dispositivos Emparejados");
     }
 
     private void pairedDevicesList() {
@@ -73,7 +77,7 @@ public class BluetoothActivity extends AppCompatActivity {
                 list.add(bt.getName() + "\n" + bt.getAddress()); //Get the device's name and the address
             }
         } else {
-            Toast.makeText(getApplicationContext(), "No Paired Bluetooth Devices Found.", Toast.LENGTH_LONG).show();
+//            Toast.makeText(getApplicationContext(), "No Paired Bluetooth Devices Found.", Toast.LENGTH_LONG).show();
         }
 
         final ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, list);
@@ -109,20 +113,39 @@ public class BluetoothActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_emparejar_dispositivo) {
+            Toast.makeText(BluetoothActivity.this, "Selecciona el dispositivo que desea emparejar por primer vez", Toast.LENGTH_LONG).show();
+            Intent intentOpenBluetoothSettings = new Intent();
+            intentOpenBluetoothSettings.setAction(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS);
+            startActivity(intentOpenBluetoothSettings);
             return true;
         }
-        if (id == R.id.action_refrescar){
+        if (id == R.id.action_refrescar) {
+            if (!myBluetooth.isEnabled()) {
+                Intent turnBTon = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                startActivityForResult(turnBTon, 1);
+            }
             pairedDevicesList();
+        }
+        if (id == android.R.id.home) {
+            finish();
         }
 
 
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    protected void onResume() {
+        pairedDevicesList();
+        if (!myBluetooth.isEnabled()) {
+            devicelist.setEmptyView(findViewById(R.id.viewBluetoothDesactivado));
+        } else {
+            devicelist.setEmptyView(findViewById(R.id.viewSinDispositivosEmparejados));
+        }
+        super.onResume();
+    }
+
 }
