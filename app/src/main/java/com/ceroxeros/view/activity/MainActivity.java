@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import com.ceroxeros.modelo.Configuracion;
 import com.ceroxeros.modelo.Dispositivo;
+import com.ceroxeros.modelo.Usuario;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.stmt.DeleteBuilder;
@@ -51,7 +52,10 @@ public class MainActivity extends AppCompatActivity
     //SPP UUID. Look for it
     static final UUID myUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     private DBHelper helper;
-    private Dao dao;
+
+    private Dao daoConfiguracion;
+    private Dao daoUsuario;
+    private Dao daoDispositivo;
 
     private Menu menu;
     private SubMenu subMenuConfiguracionesFavoritas;
@@ -59,6 +63,8 @@ public class MainActivity extends AppCompatActivity
     private NavigationView navigationView;
 
     private Snackbar snackbarConexionBT;
+
+    private Usuario usuarioActual;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,6 +92,10 @@ public class MainActivity extends AppCompatActivity
         inicializarMenuLateral(navigationView);
         inicializarMainFragment();
         inicializarConexion();
+
+        if (getUsuarioActual() != null) {
+            Toast.makeText(MainActivity.this, "Bienvenido " + usuarioActual.getNombreUsuario(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void inicializarMenuLateral(NavigationView navigationView) {
@@ -155,18 +165,18 @@ public class MainActivity extends AppCompatActivity
         List<Dispositivo> listaDispositivos = null;
         String mac = null;
         try {
-            dao = getHelper().getDispositivoDao();
-            listaDispositivos = dao.queryForAll();
-            if (listaDispositivos.size() > 0) {
-                dispositivo = listaDispositivos.get(0);
+            daoDispositivo = getHelper().getDispositivoDao();
+            dispositivo = (Dispositivo) daoDispositivo.queryForId(1);
+            if (dispositivo != null) {
                 mac = dispositivo.getMac();
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
         if (mac != null) {
-            new ConnectBT().execute();
+            address = mac;
+            //todo: iniciar conexion
+            // new ConnectBT().execute();
         }
     }
 
@@ -204,12 +214,26 @@ public class MainActivity extends AppCompatActivity
         menu.setGroupCheckable(R.id.group_configuraciones_favoritas, Boolean.TRUE, Boolean.TRUE);
         item.setChecked(true);
 
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(item.getTitle());
+        }
+
         if (id == R.id.nav_configuracion_actual) {
             fragment = new MainFragment();
         } else if (id == R.id.nav_iniciar_sesion) {
             fragment = new IniciarSesionFragment();
         } else if (id == R.id.nav_preferencias) {
             fragment = new IniciarSesionFragment();
+        } else if (id == R.id.nav_cerrar_sesion) {
+            fragment = new MainFragment();
+//            MenuItem itemIniciarSesion = (MenuItem) findViewById(R.id.nav_iniciar_sesion);
+//            MenuItem itemCerrarSesion = (MenuItem) findViewById(R.id.nav_cerrar_sesion);
+//            itemIniciarSesion.setVisible(true);
+//            itemCerrarSesion.setVisible(false);
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setTitle("Ceroxeros");
+            }
+            cerrarSesion();
         } else {
             fragment = new MainFragment(id);
         }
@@ -217,14 +241,23 @@ public class MainActivity extends AppCompatActivity
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.content_frame, fragment)
                 .commit();
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle(item.getTitle());
-        }
+
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer != null) {
             drawer.closeDrawer(GravityCompat.START);
         }
         return true;
+    }
+
+    private void cerrarSesion() {
+        try {
+            daoUsuario = getHelper().getUsuarioDao();
+            daoUsuario.delete(getUsuarioActual());
+            Toast.makeText(MainActivity.this, "Sesión cerrada", Toast.LENGTH_SHORT).show();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
     }
 
     @Override
@@ -265,7 +298,6 @@ public class MainActivity extends AppCompatActivity
     {
         private boolean ConnectSuccess = true; //if it's here, it's almost connected
         private Dispositivo dispositivoActual = null;
-        private List<Dispositivo> listaDispositivos = null;
 
         @Override
         protected void onPreExecute() {
@@ -299,25 +331,22 @@ public class MainActivity extends AppCompatActivity
                 btSocket = null;
                 Toast.makeText(getApplicationContext(), "Falló la conexión", Toast.LENGTH_SHORT).show();
                 snackbarConexionBT.show();
-                menuItemBotonBluetooth.setIcon(getResources().getDrawable(R.drawable.ic_bluetooth_disabled_white_24dp));
+                if (menuItemBotonBluetooth != null) {
+                    menuItemBotonBluetooth.setIcon(getResources().getDrawable(R.drawable.ic_bluetooth_disabled_white_24dp));
+                }
             } else {
                 Toast.makeText(getApplicationContext(), "Conectado con éxito", Toast.LENGTH_SHORT).show();
                 isBtConnected = true;
                 try {
-                    dao = getHelper().getDispositivoDao();
-                    listaDispositivos = new ArrayList<>();
-                    listaDispositivos = dao.queryForAll();
-                    if (listaDispositivos.size() > 0) {
-                        dao.delete(listaDispositivos);
-                    }
+                    daoDispositivo = getHelper().getDispositivoDao();
                     dispositivoActual = new Dispositivo();
                     dispositivoActual.setMac(address);
                     dispositivoActual.setUsuario(null);
-                    dao.create(dispositivoActual);
+                    dispositivoActual.setIdLocal(1);
+                    daoDispositivo.createOrUpdate(dispositivoActual);
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
-
                 snackbarConexionBT.dismiss();
                 menuItemBotonBluetooth.setIcon(getResources().getDrawable(R.drawable.ic_bluetooth_connected_white_24dp));
             }
@@ -342,6 +371,14 @@ public class MainActivity extends AppCompatActivity
         if (helper != null) {
             OpenHelperManager.releaseHelper();
             helper = null;
+            if (btSocket != null) {
+                try {
+                    btSocket.close();
+                    btSocket = null;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -355,9 +392,9 @@ public class MainActivity extends AppCompatActivity
         @Override
         protected Void doInBackground(Void... params) {
             try {
-                dao = getHelper().getConfiguracionDao();
+                daoConfiguracion = getHelper().getConfiguracionDao();
                 listaConfiguraciones = new ArrayList<>();
-                listaConfiguraciones = dao.queryForAll();
+                listaConfiguraciones = daoConfiguracion.queryForAll();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -376,5 +413,13 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-
+    public Usuario getUsuarioActual() {
+        try {
+            daoUsuario = getHelper().getUsuarioDao();
+            usuarioActual = (Usuario) daoUsuario.queryForId(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return usuarioActual;
+    }
 }

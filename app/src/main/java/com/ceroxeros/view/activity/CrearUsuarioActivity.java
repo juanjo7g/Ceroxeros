@@ -10,10 +10,20 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.ceroxeros.helper.DBHelper;
+import com.ceroxeros.modelo.Usuario;
 import com.ceroxeros.rest.ServiceGenerator;
-import com.ceroxeros.rest.UserService;
+import com.ceroxeros.rest.services.UserService;
 import com.ceroxeros.rest.model.User;
+import com.google.gson.Gson;
+import com.j256.ormlite.android.apptools.OpenHelperManager;
+import com.j256.ormlite.dao.Dao;
 import com.juan.electrocontrolapp.R;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.sql.SQLException;
 
 import retrofit.Callback;
 import retrofit.RetrofitError;
@@ -30,6 +40,9 @@ public class CrearUsuarioActivity extends AppCompatActivity {
 
     private Button btnCrear;
 
+    private DBHelper helper;
+    private Dao dao;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,7 +58,7 @@ public class CrearUsuarioActivity extends AppCompatActivity {
         etNombreCompleto = (EditText) findViewById(R.id.etNombreCompleto);
         etNombreUsuario = (EditText) findViewById(R.id.etNombreUsuario);
         etCorreoElectronico = (EditText) findViewById(R.id.etCorreoElectronico);
-        etContraseña = (EditText) findViewById(R.id.etContraseña);
+        etContraseña = (EditText) findViewById(R.id.etFragmentIniciarSesionContraseña);
         etContraseñaRep = (EditText) findViewById(R.id.etContraseñaRep);
 
         btnCrear = (Button) findViewById(R.id.btnCrearUsuario);
@@ -76,19 +89,44 @@ public class CrearUsuarioActivity extends AppCompatActivity {
                 user.getEmail(),
                 new Callback<Response>() {
                     @Override
-                    public void success(Response user, Response response) {
+                    public void success(Response res, Response response) {
                         progressDialog.dismiss();
-                        bodyString[0] = new String(((TypedByteArray) user.getBody()).getBytes());
-                        Toast.makeText(CrearUsuarioActivity.this, "JSON " + bodyString[0] + "rES: " + response.getStatus(), Toast.LENGTH_SHORT).show();
+                        bodyString[0] = new String(((TypedByteArray) res.getBody()).getBytes());
+                        try {
+                            JSONObject resJson = new JSONObject(bodyString[0]);
+                            if ((Boolean) resJson.get("success")) {
+                                Toast.makeText(CrearUsuarioActivity.this, "JSON " + resJson.get("data") + "rES: " + response.getStatus(), Toast.LENGTH_SHORT).show();
+                                guardarSesionUsuario((JSONObject) resJson.get("data"));
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                     }
 
                     @Override
                     public void failure(RetrofitError error) {
                         progressDialog.dismiss();
                         bodyString[0] = new String(((TypedByteArray) error.getResponse().getBody()).getBytes());
+                        //todo: Manejar error
                         Toast.makeText(CrearUsuarioActivity.this, "Res: " + bodyString[0], Toast.LENGTH_SHORT).show();
                     }
                 });
+    }
+
+    private void guardarSesionUsuario(JSONObject userJson) {
+        try {
+            Gson gson = new Gson();
+            User user = gson.fromJson(userJson.toString(), User.class);
+            Toast.makeText(CrearUsuarioActivity.this, user.toString(), Toast.LENGTH_SHORT).show();
+            Usuario usuario = new Usuario(user);
+            dao = getHelper().getUsuarioDao();
+            usuario.setIdLocal(1);
+            dao.createOrUpdate(usuario);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        finish();
     }
 
     @Override
@@ -101,5 +139,12 @@ public class CrearUsuarioActivity extends AppCompatActivity {
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public DBHelper getHelper() {
+        if (helper == null) {
+            helper = OpenHelperManager.getHelper(this, DBHelper.class);
+        }
+        return helper;
     }
 }

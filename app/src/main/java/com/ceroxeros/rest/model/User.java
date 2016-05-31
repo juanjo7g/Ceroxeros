@@ -4,12 +4,22 @@ package com.ceroxeros.rest.model;
  * Created by juan on 29/05/16.
  */
 public class User {
+    private String _id;
     private String username;
     private String password;
     private String password1;
     private String password2;
     private String email;
     private String name;
+    private String token;
+
+    public String get_id() {
+        return _id;
+    }
+
+    public void set_id(String _id) {
+        this._id = _id;
+    }
 
     public String getUsername() {
         return username;
@@ -57,5 +67,27 @@ public class User {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "_id='" + _id + '\'' +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", password1='" + password1 + '\'' +
+                ", password2='" + password2 + '\'' +
+                ", email='" + email + '\'' +
+                ", name='" + name + '\'' +
+                ", token='" + token + '\'' +
+                '}';
     }
 }

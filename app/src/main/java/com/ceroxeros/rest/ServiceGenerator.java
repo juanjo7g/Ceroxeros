@@ -1,5 +1,7 @@
 package com.ceroxeros.rest;
 
+import com.ceroxeros.rest.services.ConfigurationService;
+import com.ceroxeros.rest.services.UserService;
 import com.squareup.okhttp.OkHttpClient;
 
 import retrofit.RestAdapter;
@@ -21,8 +23,13 @@ public class ServiceGenerator {
             .build();
 
     private static final UserService USER_SERVICE = REST_ADAPTER.create(UserService.class);
+    private static final ConfigurationService CONFIGURATION_SERVICE = REST_ADAPTER.create(ConfigurationService.class);
 
     public static UserService getUserService(){
         return USER_SERVICE;
+    }
+
+    public static ConfigurationService getConfigurationService() {
+        return CONFIGURATION_SERVICE;
     }
 }

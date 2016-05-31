@@ -1,5 +1,6 @@
 package com.ceroxeros.modelo;
 
+import com.ceroxeros.rest.model.User;
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
 
@@ -43,6 +44,29 @@ public class Usuario {
 
     @DatabaseField(columnName = SINCRONIZADO)
     private Boolean sincronizado = Boolean.FALSE;
+
+    public Usuario() {
+    }
+
+    public Usuario(User user) {
+        if (user != null) {
+            if (user.get_id() != null) {
+                idRemoto = user.get_id();
+            }
+            if (user.getName() != null) {
+                nombreCompleto = user.getName();
+            }
+            if (user.getUsername() != null) {
+                nombreUsuario = user.getUsername();
+            }
+            if (user.getEmail() != null) {
+                correo = user.getEmail();
+            }
+            if (user.getToken() != null) {
+                token = user.getToken();
+            }
+        }
+    }
 
     public int getIdLocal() {
         return idLocal;
@@ -114,5 +138,18 @@ public class Usuario {
 
     public void setSincronizado(Boolean sincronizado) {
         this.sincronizado = sincronizado;
+    }
+
+    @Override
+    public String toString() {
+        return "Usuario{" +
+                "idLocal=" + idLocal +
+                ", idRemoto='" + idRemoto + '\'' +
+                ", token='" + token + '\'' +
+                ", nombreUsuario='" + nombreUsuario + '\'' +
+                ", nombreCompleto='" + nombreCompleto + '\'' +
+                ", correo='" + correo + '\'' +
+                ", sincronizado=" + sincronizado +
+                '}';
     }
 }

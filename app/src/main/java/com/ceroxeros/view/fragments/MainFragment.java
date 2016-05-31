@@ -21,13 +21,25 @@ import android.widget.SeekBar;
 import android.widget.Toast;
 
 import com.ceroxeros.modelo.Configuracion;
+import com.ceroxeros.modelo.Usuario;
+import com.ceroxeros.rest.ServiceGenerator;
+import com.ceroxeros.rest.model.Configuration;
+import com.ceroxeros.rest.services.ConfigurationService;
 import com.j256.ormlite.dao.Dao;
 import com.juan.electrocontrolapp.R;
 import com.ceroxeros.view.activity.MainActivity;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Date;
+
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
+import retrofit.mime.TypedByteArray;
 
 public class MainFragment extends Fragment {
 
@@ -42,7 +54,9 @@ public class MainFragment extends Fragment {
 
     private Boolean favorito;
 
-    private Dao dao;
+    private Dao daoConfiguracion;
+    private Dao daoUsuario;
+
     private Configuracion configuracion;
 
     private MenuItem menuItemFavorito;
@@ -140,8 +154,8 @@ public class MainFragment extends Fragment {
 
         if (configuracion.getIdLocal() == -1) {
             try {
-                dao = mainActivity.getHelper().getConfiguracionDao();
-                configuracion = (Configuracion) dao.queryForId(-1);
+                daoConfiguracion = mainActivity.getHelper().getConfiguracionDao();
+                configuracion = (Configuracion) daoConfiguracion.queryForId(-1);
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -154,19 +168,18 @@ public class MainFragment extends Fragment {
         }
         if (configuracion.getIdLocal() > 0) {
             try {
-                dao = mainActivity.getHelper().getConfiguracionDao();
-                configuracion = (Configuracion) dao.queryForId(configuracion.getIdLocal());
+                daoConfiguracion = mainActivity.getHelper().getConfiguracionDao();
+                configuracion = (Configuracion) daoConfiguracion.queryForId(configuracion.getIdLocal());
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
         inicializarConfiguracion();
-
         return rootView;
     }
 
     private void inicializarConfiguracion() {
-        if (configuracion != null) {
+        if (configuracion != null && configuracion.getModo() != null) {
             switch (configuracion.getModo().toLowerCase()) {
                 case "a":
                     activarModoA();
@@ -248,8 +261,8 @@ public class MainFragment extends Fragment {
             ultimaConfiguracion.setModo(configuracion.getModo());
             ultimaConfiguracion.setIntensidad(configuracion.getIntensidad());
             ultimaConfiguracion.setIdLocal(-1);
-            dao = mainActivity.getHelper().getConfiguracionDao();
-            dao.createOrUpdate(ultimaConfiguracion);
+            daoConfiguracion = mainActivity.getHelper().getConfiguracionDao();
+            daoConfiguracion.createOrUpdate(ultimaConfiguracion);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -339,12 +352,57 @@ public class MainFragment extends Fragment {
         @Override
         protected Void doInBackground(Void... params) {
             try {
-                dao = mainActivity.getHelper().getConfiguracionDao();
+                daoConfiguracion = mainActivity.getHelper().getConfiguracionDao();
                 configuracionAGuardar = new Configuracion();
                 configuracionAGuardar.setIntensidad(configuracion.getIntensidad());
                 configuracionAGuardar.setModo(configuracion.getModo());
                 configuracionAGuardar.setFechaCreacion(new Date());
-                dao.create(configuracionAGuardar);
+                daoConfiguracion.create(configuracionAGuardar);
+                if (mainActivity.getUsuarioActual() != null) {
+                    final String[] bodyString = new String[1];
+                    final int idConfiguracion = configuracionAGuardar.getIdLocal();
+                    configuracionAGuardar.setUsuario(mainActivity.getUsuarioActual());
+                    ConfigurationService configurationService = ServiceGenerator.getConfigurationService();
+                    final Configuration configuration = new Configuration(configuracionAGuardar);
+                    configurationService.crearConfiguracion("Configuracion " + idConfiguracion,
+                            configuration.getMode(),
+                            configuration.getIntensity(),
+                            mainActivity.getUsuarioActual().getToken(),
+                            new Callback<Response>() {
+                                @Override
+                                public void success(Response res, Response response) {
+                                    bodyString[0] = new String(((TypedByteArray) res.getBody()).getBytes());
+                                    try {
+                                        JSONObject resJson = new JSONObject(bodyString[0]);
+                                        if ((Boolean) resJson.get("success")) {
+                                            Toast.makeText(mainActivity, "JSON " + bodyString[0], Toast.LENGTH_SHORT).show();
+                                            configuracionAGuardar.setSincronizado(true);
+                                            try {
+                                                daoConfiguracion = mainActivity.getHelper().getConfiguracionDao();
+                                                daoConfiguracion.update(configuracionAGuardar);
+                                            } catch (SQLException e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+
+                                @Override
+                                public void failure(RetrofitError error) {
+                                    try {
+                                        bodyString[0] = new String(((TypedByteArray) error.getResponse().getBody()).getBytes());
+                                        Toast.makeText(getActivity(), "Res: " + bodyString[0], Toast.LENGTH_SHORT).show();
+                                        configuracion.setSincronizado(false);
+                                        daoConfiguracion = mainActivity.getHelper().getConfiguracionDao();
+                                        daoConfiguracion.update(configuracionAGuardar);
+                                    } catch (SQLException | NullPointerException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            });
+                }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -368,9 +426,9 @@ public class MainFragment extends Fragment {
         @Override
         protected Void doInBackground(Void... params) {
             try {
-                dao = mainActivity.getHelper().getConfiguracionDao();
+                daoConfiguracion = mainActivity.getHelper().getConfiguracionDao();
                 configuracion.setEliminado(true);
-                dao.update(configuracion);
+                daoConfiguracion.update(configuracion);
             } catch (SQLException e) {
                 e.printStackTrace();
             }

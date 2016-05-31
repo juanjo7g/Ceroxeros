@@ -1,5 +1,6 @@
 package com.ceroxeros.modelo;
 
+import com.ceroxeros.rest.model.Configuration;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
@@ -44,6 +45,26 @@ public class Configuracion {
     private Boolean eliminado = Boolean.FALSE;
     @DatabaseField(columnName = SINCRONIZADO)
     private Boolean sincronizado = Boolean.FALSE;
+
+    public Configuracion() {
+    }
+
+    public Configuracion(Configuration configuration) {
+        if (configuration != null) {
+            if (configuration.get_id() != null) {
+                idRemoto = configuration.get_id();
+            }
+            if (configuration.getName() != null) {
+                nombre = configuration.getName();
+            }
+            if (configuration.getMode() != null) {
+                modo = configuration.getMode();
+            }
+            if (configuration.getIntensity() != null) {
+                intensidad = configuration.getIntensity();
+            }
+        }
+    }
 
     public int getIdLocal() {
         return idLocal;
