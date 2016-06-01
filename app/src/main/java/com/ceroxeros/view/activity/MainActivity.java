@@ -252,7 +252,11 @@ public class MainActivity extends AppCompatActivity
     private void cerrarSesion() {
         try {
             daoUsuario = getHelper().getUsuarioDao();
-            daoUsuario.delete(getUsuarioActual());
+            Usuario usuario = getUsuarioActual();
+            if (usuario != null) {
+                usuario.setToken(null);
+                daoUsuario.update(usuario);
+            }
             Toast.makeText(MainActivity.this, "Sesión cerrada", Toast.LENGTH_SHORT).show();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -417,9 +421,12 @@ public class MainActivity extends AppCompatActivity
         try {
             daoUsuario = getHelper().getUsuarioDao();
             usuarioActual = (Usuario) daoUsuario.queryForId(1);
+            if (usuarioActual != null && usuarioActual.getToken() != null) {
+                return usuarioActual;
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return usuarioActual;
+        return null;
     }
 }
