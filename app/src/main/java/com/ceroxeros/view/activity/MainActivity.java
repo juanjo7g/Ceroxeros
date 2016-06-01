@@ -104,6 +104,7 @@ public class MainActivity extends AppCompatActivity
             subMenuConfiguracionesFavoritas.setGroupCheckable(R.id.group_configuraciones_favoritas, Boolean.TRUE, Boolean.TRUE);
             navigationView.setNavigationItemSelectedListener(this);
             new TaskCargarConfiguraciones().execute();
+            actualizarSesionMenuLateral();
         }
     }
 
@@ -226,10 +227,6 @@ public class MainActivity extends AppCompatActivity
             fragment = new IniciarSesionFragment();
         } else if (id == R.id.nav_cerrar_sesion) {
             fragment = new MainFragment();
-//            MenuItem itemIniciarSesion = (MenuItem) findViewById(R.id.nav_iniciar_sesion);
-//            MenuItem itemCerrarSesion = (MenuItem) findViewById(R.id.nav_cerrar_sesion);
-//            itemIniciarSesion.setVisible(true);
-//            itemCerrarSesion.setVisible(false);
             if (getSupportActionBar() != null) {
                 getSupportActionBar().setTitle("Ceroxeros");
             }
@@ -256,7 +253,9 @@ public class MainActivity extends AppCompatActivity
             if (usuario != null) {
                 usuario.setToken(null);
                 daoUsuario.update(usuario);
+                actualizarSesionMenuLateral();
             }
+            //todo: borrar configuraciones
             Toast.makeText(MainActivity.this, "Sesión cerrada", Toast.LENGTH_SHORT).show();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -428,5 +427,16 @@ public class MainActivity extends AppCompatActivity
             e.printStackTrace();
         }
         return null;
+    }
+
+    public void actualizarSesionMenuLateral(){
+        //Todo: cargar informacion del usuario
+        if (getUsuarioActual() != null) {
+            menu.findItem(R.id.nav_iniciar_sesion).setVisible(false);
+            menu.findItem(R.id.nav_cerrar_sesion).setVisible(true);
+        } else {
+            menu.findItem(R.id.nav_iniciar_sesion).setVisible(true);
+            menu.findItem(R.id.nav_cerrar_sesion).setVisible(false);
+        }
     }
 }

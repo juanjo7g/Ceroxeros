@@ -220,7 +220,6 @@ public class IniciarSesionFragment extends Fragment implements GoogleApiClient.O
                             final JSONObject resJson = new JSONObject(bodyString[0]);
                             Toast.makeText(getActivity(), "JSON " + resJson + "rES: " + response.getStatus(), Toast.LENGTH_SHORT).show();
                             guardarSesionUsuario((JSONObject) resJson);
-                            //todo: revisar si se esta guardando el usuario que inicia sesion :s
                             progressDialog.setMessage("Cargando configuraciones favoritas");
                             ConfigurationService configurationService = ServiceGenerator.getConfigurationService();
                             String token = resJson.getString("token");
@@ -299,7 +298,7 @@ public class IniciarSesionFragment extends Fragment implements GoogleApiClient.O
             dao = mainActivity.getHelper().getUsuarioDao();
             usuario.setIdLocal(1);
             dao.createOrUpdate(usuario);
-
+            mainActivity.actualizarSesionMenuLateral();
         } catch (SQLException e) {
             e.printStackTrace();
         }
