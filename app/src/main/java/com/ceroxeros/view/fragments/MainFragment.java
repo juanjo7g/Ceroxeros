@@ -9,7 +9,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -21,7 +20,6 @@ import android.widget.SeekBar;
 import android.widget.Toast;
 
 import com.ceroxeros.modelo.Configuracion;
-import com.ceroxeros.modelo.Usuario;
 import com.ceroxeros.rest.ServiceGenerator;
 import com.ceroxeros.rest.model.Configuration;
 import com.ceroxeros.rest.services.ConfigurationService;
@@ -192,7 +190,7 @@ public class MainFragment extends Fragment {
                     break;
             }
             sbIntensidad.setProgress(configuracion.getIntensidad().intValue());
-            enviarStringBluetooth(configuracion.getIntensidad() + "");
+            enviarIntensidadBluetooth(configuracion.getIntensidad());
         }
     }
 
@@ -205,7 +203,7 @@ public class MainFragment extends Fragment {
         configuracion.setModo("A");
         //mostrarMensajeConfiguracionActual();
         guardarUltimaConfiguracion();
-        enviarStringBluetooth(configuracion.getModo());
+        enviarModoBluetooth(configuracion.getModo());
     }
 
     private void activarModoB() {
@@ -216,7 +214,7 @@ public class MainFragment extends Fragment {
         configuracion.setModo("B");
         //mostrarMensajeConfiguracionActual();
         guardarUltimaConfiguracion();
-        enviarStringBluetooth(configuracion.getModo());
+        enviarModoBluetooth(configuracion.getModo());
     }
 
     private void activarModoC() {
@@ -227,7 +225,7 @@ public class MainFragment extends Fragment {
         configuracion.setModo("C");
         //mostrarMensajeConfiguracionActual();
         guardarUltimaConfiguracion();
-        enviarStringBluetooth(configuracion.getModo());
+        enviarModoBluetooth(configuracion.getModo());
     }
 
 
@@ -239,7 +237,7 @@ public class MainFragment extends Fragment {
         actualizaColores();
         //mostrarMensajeConfiguracionActual();
         guardarUltimaConfiguracion();
-        enviarStringBluetooth(configuracion.getIntensidad() + "");
+        enviarIntensidadBluetooth(configuracion.getIntensidad());
     }
 
 
@@ -251,7 +249,7 @@ public class MainFragment extends Fragment {
         actualizaColores();
 //        mostrarMensajeConfiguracionActual();
         guardarUltimaConfiguracion();
-        enviarStringBluetooth(configuracion.getIntensidad() + "");
+        enviarIntensidadBluetooth(configuracion.getIntensidad());
     }
 
     private void guardarUltimaConfiguracion() {
@@ -293,19 +291,41 @@ public class MainFragment extends Fragment {
     }
 
     public void mostrarMensajeConfiguracionActual() {
-        Float intensidadF = configuracion.getIntensidad() / 10;
+        int intensidadF = (int) (configuracion.getIntensidad() / 10);
         if (getView() != null) {
             Snackbar.make(getView(), "Modo: " + configuracion.getModo() + " Intensidad: " + intensidadF,
                     Snackbar.LENGTH_SHORT).show();
         }
     }
 
-    private void enviarStringBluetooth(String s) {
+    private void enviarModoBluetooth(String modo) {
         BluetoothSocket btSocket = mainActivity.getBtSocket();
-        if (btSocket != null && s != null) {
+        if (btSocket != null && modo != null) {
             try {
-                s = s.toLowerCase();
-                btSocket.getOutputStream().write(s.getBytes());
+                modo = modo.toLowerCase();
+                btSocket.getOutputStream().write(modo.getBytes());
+                mostrarMensajeConfiguracionActual();
+            } catch (IOException e) {
+                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void enviarIntensidadBluetooth(Float intensidad) {
+        BluetoothSocket btSocket = mainActivity.getBtSocket();
+        int intensidadInt = (int) (intensidad / 10);
+        String intensidadStr;
+        if (intensidadInt == 0) {
+            intensidadStr = "p";
+        } else if (intensidadInt == 10) {
+            intensidadStr = "m";
+        } else {
+            intensidadStr = intensidadInt + "";
+        }
+        if (btSocket != null) {
+            try {
+                intensidadStr = intensidadStr.toLowerCase();
+                btSocket.getOutputStream().write(intensidadStr.getBytes());
                 mostrarMensajeConfiguracionActual();
             } catch (IOException e) {
                 Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
@@ -490,7 +510,8 @@ public class MainFragment extends Fragment {
             Snackbar.make(getView(), s, Snackbar.LENGTH_LONG).show();
         }
     }
-    void mostrarMensajeToast(String s){
+
+    void mostrarMensajeToast(String s) {
         Toast.makeText(getActivity(), s, Toast.LENGTH_SHORT).show();
     }
 
