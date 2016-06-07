@@ -18,16 +18,19 @@ public class Configuration {
     public Configuration() {
     }
 
-    public Configuration(Configuracion configuracionAGuardar) {
-        if (configuracionAGuardar != null) {
-            if (configuracionAGuardar.getNombre() != null) {
-                name = configuracionAGuardar.getNombre();
+    public Configuration(Configuracion configuracion) {
+        if (configuracion != null) {
+            if (configuracion.getNombre() != null) {
+                name = configuracion.getNombre();
             }
-            if (configuracionAGuardar.getModo() != null) {
-                mode = configuracionAGuardar.getModo();
+            if (configuracion.getModo() != null) {
+                mode = configuracion.getModo();
             }
-            if (configuracionAGuardar.getIntensidad() != null) {
-                intensity = configuracionAGuardar.getIntensidad();
+            if (configuracion.getIntensidad() != null) {
+                intensity = configuracion.getIntensidad();
+            }
+            if (configuracion.getIdRemoto() != null) {
+                _id = configuracion.getIdRemoto();
             }
         }
     }

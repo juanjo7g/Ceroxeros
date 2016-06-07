@@ -413,7 +413,7 @@ public class MainFragment extends Fragment {
         protected void onPostExecute(Void result) {
             int idConfiguracion = configuracionAGuardar.getIdLocal();
             mainActivity.agregarConfiguracionFavoritaAlMenuLateral(configuracionAGuardar, true);
-            mostrarMensaje("Config " + idConfiguracion + " guardada");
+            mostrarMensajeToast("Configuración " + idConfiguracion + " guardada.");
         }
     }
 
@@ -428,7 +428,49 @@ public class MainFragment extends Fragment {
             try {
                 daoConfiguracion = mainActivity.getHelper().getConfiguracionDao();
                 configuracion.setEliminado(true);
+                configuracion.setSincronizado(false);
                 daoConfiguracion.update(configuracion);
+                if (mainActivity.getUsuarioActual() != null) {
+                    final String[] bodyString = new String[1];
+                    final String idConfiguracion = configuracion.getIdRemoto();
+                    ConfigurationService configurationService = ServiceGenerator.getConfigurationService();
+                    configurationService.eliminarConfiguracion(idConfiguracion,
+                            mainActivity.getUsuarioActual().getToken(),
+                            new Callback<Response>() {
+                                @Override
+                                public void success(Response res, Response response) {
+                                    bodyString[0] = new String(((TypedByteArray) res.getBody()).getBytes());
+                                    try {
+                                        JSONObject resJson = new JSONObject(bodyString[0]);
+                                        if ((Boolean) resJson.get("success")) {
+                                            Toast.makeText(mainActivity, "JSON " + bodyString[0], Toast.LENGTH_SHORT).show();
+                                            configuracion.setSincronizado(true);
+                                            try {
+                                                daoConfiguracion = mainActivity.getHelper().getConfiguracionDao();
+                                                daoConfiguracion.update(configuracion);
+                                            } catch (SQLException e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+
+                                @Override
+                                public void failure(RetrofitError error) {
+                                    try {
+                                        bodyString[0] = new String(((TypedByteArray) error.getResponse().getBody()).getBytes());
+                                        Toast.makeText(getActivity(), "Res: " + bodyString[0], Toast.LENGTH_SHORT).show();
+                                        configuracion.setSincronizado(false);
+                                        daoConfiguracion = mainActivity.getHelper().getConfiguracionDao();
+                                        daoConfiguracion.update(configuracion);
+                                    } catch (SQLException | NullPointerException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            });
+                }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -438,7 +480,7 @@ public class MainFragment extends Fragment {
         @Override
         protected void onPostExecute(Void result) {
             mainActivity.eliminaraConfiguracionFavoritaMenuLateral(configuracion.getIdLocal());
-            mostrarMensaje("Config " + configuracion.getIdLocal() + " eliminada");
+            mostrarMensajeToast("Configuración " + configuracion.getIdLocal() + " eliminada.");
         }
     }
 
@@ -447,6 +489,9 @@ public class MainFragment extends Fragment {
         if (getView() != null) {
             Snackbar.make(getView(), s, Snackbar.LENGTH_LONG).show();
         }
+    }
+    void mostrarMensajeToast(String s){
+        Toast.makeText(getActivity(), s, Toast.LENGTH_SHORT).show();
     }
 
 }

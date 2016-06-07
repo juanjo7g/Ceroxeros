@@ -40,11 +40,11 @@
             android:icon="@drawable/ic_directions_run_black_24dp"
             android:orderInCategory="3"
             android:title="Cerrar Sesión" />
-        <item
-            android:id="@+id/nav_preferencias"
-            android:icon="@drawable/ic_settings_black_24dp"
-            android:orderInCategory="3"
-            android:title="Preferencias" />
+        <!--<item-->
+            <!--android:id="@+id/nav_preferencias"-->
+            <!--android:icon="@drawable/ic_settings_black_24dp"-->
+            <!--android:orderInCategory="3"-->
+            <!--android:title="Preferencias" />-->
     </group>
 
 </menu>

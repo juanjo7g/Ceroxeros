@@ -105,10 +105,14 @@ public class CrearUsuarioActivity extends AppCompatActivity {
 
                     @Override
                     public void failure(RetrofitError error) {
-                        progressDialog.dismiss();
-                        bodyString[0] = new String(((TypedByteArray) error.getResponse().getBody()).getBytes());
-                        //todo: Manejar error
-                        Toast.makeText(CrearUsuarioActivity.this, "Res: " + bodyString[0], Toast.LENGTH_SHORT).show();
+                        try {
+                            progressDialog.dismiss();
+                            bodyString[0] = new String(((TypedByteArray) error.getResponse().getBody()).getBytes());
+                            //todo: Manejar error
+                            Toast.makeText(CrearUsuarioActivity.this, "Res: " + bodyString[0], Toast.LENGTH_SHORT).show();
+                        } catch (NullPointerException e) {
+                            e.printStackTrace();
+                        }
                     }
                 });
     }

@@ -5,13 +5,11 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ceroxeros.modelo.Configuracion;
@@ -32,18 +30,6 @@ import com.facebook.GraphResponse;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.Scopes;
-import com.google.android.gms.common.SignInButton;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.OptionalPendingResult;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Scope;
-import com.google.android.gms.common.api.Status;
 import com.google.gson.Gson;
 import com.j256.ormlite.dao.Dao;
 import com.juan.electrocontrolapp.R;
@@ -58,17 +44,12 @@ import java.util.List;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
-import retrofit.http.FormUrlEncoded;
 import retrofit.mime.TypedByteArray;
 
-public class IniciarSesionFragment extends Fragment implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
+public class IniciarSesionFragment extends Fragment {
 
-    private TextView info;
     private LoginButton loginButtonFacebook;
     private CallbackManager callbackManager;
-    private GoogleApiClient mGoogleApiClient;
-
-    private static final int RC_SIGN_IN = 9001;
 
     private Button buttonCrearUsuario;
     private EditText etNombreUsuario;
@@ -97,11 +78,10 @@ public class IniciarSesionFragment extends Fragment implements GoogleApiClient.O
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_iniciar_sesion, container, false);
-        info = (TextView) view.findViewById(R.id.tokentext);
 
         /** Inicio de sesion con Facebook. */
 
-        loginButtonFacebook = (LoginButton) view.findViewById(R.id.login_button);
+        loginButtonFacebook = (LoginButton) view.findViewById(R.id.btnLoginFB);
         loginButtonFacebook.setFragment(this);
 
         loginButtonFacebook.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
@@ -136,7 +116,7 @@ public class IniciarSesionFragment extends Fragment implements GoogleApiClient.O
                                             + "\n" +
                                             "Email: " + object.optString("email") + "\n";
                                     System.out.println(texto);
-                                    info.setText(texto);
+                                    Toast.makeText(getActivity(), texto, Toast.LENGTH_SHORT).show();
                                 }
                             }
                         });
@@ -157,28 +137,6 @@ public class IniciarSesionFragment extends Fragment implements GoogleApiClient.O
             }
         });
 
-        /** Inicio de sesion con Google. */
-        view.findViewById(R.id.sign_in_button).setOnClickListener(this);
-        view.findViewById(R.id.btnSignOut).setOnClickListener(this);
-
-        // Configurando inicio de sesion para obtener los datos deseados.
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail()
-                .requestId()
-                .requestProfile()
-                .requestScopes(new Scope(Scopes.PLUS_LOGIN))
-                .build();
-
-        // Construyendo un GoogleApiClient con acceso al Google Sign In API y las opciones especificadas en el gso.
-        mGoogleApiClient = new GoogleApiClient.Builder(view.getContext())
-                .enableAutoManage(this.getActivity(), this)
-                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                .build();
-
-        // Personalizando el boton de google+
-        SignInButton signInButton = (SignInButton) view.findViewById(R.id.sign_in_button);
-        signInButton.setSize(SignInButton.SIZE_STANDARD);
-        signInButton.setScopes(gso.getScopeArray());
 
         buttonCrearUsuario = (Button) view.findViewById(R.id.buttonCrearUsuario);
         buttonCrearUsuario.setOnClickListener(new View.OnClickListener() {
@@ -202,6 +160,13 @@ public class IniciarSesionFragment extends Fragment implements GoogleApiClient.O
         return view;
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        // Facebook.
+        callbackManager.onActivityResult(requestCode, resultCode, data);
+    }
+
     private void iniciarSesion() {
         final ProgressDialog progressDialog = ProgressDialog.show(this.getActivity(), null, "Iniciando sesion...", true, false);
         User user = new User();
@@ -223,7 +188,7 @@ public class IniciarSesionFragment extends Fragment implements GoogleApiClient.O
                             progressDialog.setMessage("Cargando configuraciones favoritas");
                             ConfigurationService configurationService = ServiceGenerator.getConfigurationService();
                             String token = resJson.getString("token");
-                            configurationService.obtenerConfiguracione(token, new Callback<Response>() {
+                            configurationService.obtenerConfiguracion(token, new Callback<Response>() {
                                 @Override
                                 public void success(Response response, Response response2) {
                                     bodyString[1] = new String(((TypedByteArray) response.getBody()).getBytes());
@@ -251,10 +216,14 @@ public class IniciarSesionFragment extends Fragment implements GoogleApiClient.O
 
                     @Override
                     public void failure(RetrofitError error) {
-                        progressDialog.dismiss();
-                        bodyString[0] = new String(((TypedByteArray) error.getResponse().getBody()).getBytes());
-                        //todo: Manejar error
-                        Toast.makeText(getActivity(), "Res: " + bodyString[0], Toast.LENGTH_SHORT).show();
+                        try {
+                            progressDialog.dismiss();
+                            bodyString[0] = new String(((TypedByteArray) error.getResponse().getBody()).getBytes());
+                            //todo: Manejar error
+                            Toast.makeText(getActivity(), "Res: " + bodyString[0], Toast.LENGTH_SHORT).show();
+                        } catch (NullPointerException e) {
+                            e.printStackTrace();
+                        }
                     }
                 });
     }
@@ -304,127 +273,5 @@ public class IniciarSesionFragment extends Fragment implements GoogleApiClient.O
         }
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        // Facebook.
-        callbackManager.onActivityResult(requestCode, resultCode, data);
 
-        // Google.
-        if (requestCode == RC_SIGN_IN) {
-            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-            handleSignInResult(result);
-        }
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        OptionalPendingResult<GoogleSignInResult> opr = Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
-        if (opr.isDone()) {
-            GoogleSignInResult result = opr.get();
-            handleSignInResult(result);
-        } else {
-            opr.setResultCallback(new ResultCallback<GoogleSignInResult>() {
-                @Override
-                public void onResult(GoogleSignInResult googleSignInResult) {
-                    handleSignInResult(googleSignInResult);
-                }
-            });
-        }
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mGoogleApiClient.stopAutoManage(getActivity());
-        mGoogleApiClient.disconnect();
-    }
-
-    /**
-     * Función para ver el estado de la petición. Si fue satisfactoria u ocurrió algún error.
-     *
-     * @param result = Trae el estado de la conexión con los servidores de google.
-     */
-    private void handleSignInResult(GoogleSignInResult result) {
-        Log.d("Sign in: ", "HandleSignInResult: " + result.isSuccess());
-        if (result.isSuccess()) {
-            // Signed in successfully, show authenticated UI.
-            GoogleSignInAccount acct = result.getSignInAccount();
-            String texto = "User Id: "
-                    + acct.getId()
-                    + "\n" +
-                    "Name: "
-                    + acct.getDisplayName()
-                    + "\n" +
-                    "Email: "
-                    + acct.getEmail();
-            info.setText(texto);
-            updateUI(true);
-        } else {
-            // Signed out, show unauthenticated UI.
-            updateUI(false);
-        }
-    }
-
-    /**
-     * Define las acciones a seguir cuando se presione en un boton de la aplicación.
-     *
-     * @param v = vista que manejará los eventos.
-     */
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.sign_in_button:
-                signIn();
-                break;
-            case R.id.btnSignOut:
-                signOut();
-                break;
-        }
-    }
-
-    /**
-     * Función llamada cuando se presiona el boton para iniciar sesión.
-     */
-    private void signIn() {
-        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
-        startActivityForResult(signInIntent, RC_SIGN_IN);
-    }
-
-    /**
-     * Funcion llamada cuando se presiona el boton para salir de la sesión
-     */
-    private void signOut() {
-        Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
-                new ResultCallback<Status>() {
-                    @Override
-                    public void onResult(Status status) {
-                        updateUI(false);
-                    }
-                });
-    }
-
-    /**
-     * Función para actualziar la vista, esconde el botón de inicio de sesión o no, de acuerdo a
-     * el estado del loggeo.
-     *
-     * @param signedIn = True/False para identificar si la sesión esta activa o no.
-     */
-    private void updateUI(boolean signedIn) {
-        if (signedIn) {
-            getActivity().findViewById(R.id.sign_in_button).setVisibility(View.GONE);
-            getActivity().findViewById(R.id.btnSignOut).setVisibility(View.VISIBLE);
-        } else {
-            info.setText("Se ha deslogueado.");
-            getActivity().findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
-            getActivity().findViewById(R.id.btnSignOut).setVisibility(View.GONE);
-        }
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-        Log.d("SignInActivity", "onConnectionFailed:" + connectionResult);
-    }
 }

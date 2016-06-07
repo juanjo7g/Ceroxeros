@@ -19,11 +19,14 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ceroxeros.modelo.Configuracion;
 import com.ceroxeros.modelo.Dispositivo;
 import com.ceroxeros.modelo.Usuario;
+import com.ceroxeros.util.Utility;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.stmt.DeleteBuilder;
@@ -92,10 +95,6 @@ public class MainActivity extends AppCompatActivity
         inicializarMenuLateral(navigationView);
         inicializarMainFragment();
         inicializarConexion();
-
-        if (getUsuarioActual() != null) {
-            Toast.makeText(MainActivity.this, "Bienvenido " + usuarioActual.getNombreUsuario(), Toast.LENGTH_SHORT).show();
-        }
     }
 
     private void inicializarMenuLateral(NavigationView navigationView) {
@@ -215,16 +214,14 @@ public class MainActivity extends AppCompatActivity
         menu.setGroupCheckable(R.id.group_configuraciones_favoritas, Boolean.TRUE, Boolean.TRUE);
         item.setChecked(true);
 
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle(item.getTitle());
-        }
-
         if (id == R.id.nav_configuracion_actual) {
             fragment = new MainFragment();
         } else if (id == R.id.nav_iniciar_sesion) {
-            fragment = new IniciarSesionFragment();
-        } else if (id == R.id.nav_preferencias) {
-            fragment = new IniciarSesionFragment();
+            if (Utility.isOnline()) {
+                fragment = new IniciarSesionFragment();
+            } else {
+                Toast.makeText(MainActivity.this, "Sin Internet. Esta funcionalidad requiere conexión.", Toast.LENGTH_SHORT).show();
+            }
         } else if (id == R.id.nav_cerrar_sesion) {
             fragment = new MainFragment();
             if (getSupportActionBar() != null) {
@@ -234,11 +231,18 @@ public class MainActivity extends AppCompatActivity
         } else {
             fragment = new MainFragment(id);
         }
-
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.content_frame, fragment)
-                .commit();
-
+        if (fragment != null) {
+            if (getSupportActionBar() != null) {
+                if (id == R.id.nav_cerrar_sesion) {
+                    getSupportActionBar().setTitle("Ceroxeros");
+                } else {
+                    getSupportActionBar().setTitle(item.getTitle());
+                }
+            }
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.content_frame, fragment)
+                    .commit();
+        }
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer != null) {
             drawer.closeDrawer(GravityCompat.START);
@@ -247,15 +251,24 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void cerrarSesion() {
+        List<Configuracion> listaConfiguraciones = null;
+        Configuracion config;
         try {
+            Toast.makeText(MainActivity.this, "Cerrando sesión...", Toast.LENGTH_SHORT).show();
             daoUsuario = getHelper().getUsuarioDao();
+            daoConfiguracion = getHelper().getConfiguracionDao();
+            listaConfiguraciones = daoConfiguracion.queryForAll();
+            for (int i = 0; i<listaConfiguraciones.size(); i++){
+                config = listaConfiguraciones.get(i);
+                config.setUsuario(null);
+                daoConfiguracion.update(config);
+            }
             Usuario usuario = getUsuarioActual();
             if (usuario != null) {
                 usuario.setToken(null);
                 daoUsuario.update(usuario);
                 actualizarSesionMenuLateral();
             }
-            //todo: borrar configuraciones
             Toast.makeText(MainActivity.this, "Sesión cerrada", Toast.LENGTH_SHORT).show();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -429,14 +442,20 @@ public class MainActivity extends AppCompatActivity
         return null;
     }
 
-    public void actualizarSesionMenuLateral(){
-        //Todo: cargar informacion del usuario
+    public void actualizarSesionMenuLateral() {
+        View headerView = navigationView.getHeaderView(0);
+        TextView tvNombreNavHeader = (TextView) headerView.findViewById(R.id.textViewNombreNavHeader);
+        TextView tvEmailNavHeader = (TextView) headerView.findViewById(R.id.textViewEmailEmailNavHeader);
         if (getUsuarioActual() != null) {
             menu.findItem(R.id.nav_iniciar_sesion).setVisible(false);
             menu.findItem(R.id.nav_cerrar_sesion).setVisible(true);
+            tvNombreNavHeader.setText(usuarioActual.getNombreCompleto());
+            tvEmailNavHeader.setText(usuarioActual.getCorreo());
         } else {
             menu.findItem(R.id.nav_iniciar_sesion).setVisible(true);
             menu.findItem(R.id.nav_cerrar_sesion).setVisible(false);
+            tvNombreNavHeader.setText("Usuario Invitado - Inicie Sesión");
+            tvEmailNavHeader.setText("");
         }
     }
 }

@@ -1,5 +1,8 @@
 package com.ceroxeros.rest.services;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
 import retrofit.Callback;
 import retrofit.client.Response;
 import retrofit.http.Field;
@@ -21,6 +24,13 @@ public interface ConfigurationService {
                             Callback<Response> callback);
 
     @GET("/api/v1/configuration/get")
-    void obtenerConfiguracione(@Query("token") String token,
+    void obtenerConfiguracion(@Query("token") String token,
+                              Callback<Response> callback);
+
+    @FormUrlEncoded
+    @POST("/api/v1/configuration/delete")
+    void eliminarConfiguracion(@Field("_id") String _id,
+                               @Field("token") String token,
                                Callback<Response> callback);
+
 }
