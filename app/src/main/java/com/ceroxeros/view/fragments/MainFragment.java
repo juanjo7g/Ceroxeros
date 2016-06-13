@@ -3,6 +3,7 @@ package com.ceroxeros.view.fragments;
 import android.app.Activity;
 import android.bluetooth.BluetoothSocket;
 import android.content.res.ColorStateList;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -190,6 +191,7 @@ public class MainFragment extends Fragment {
                     break;
             }
             sbIntensidad.setProgress(configuracion.getIntensidad().intValue());
+            actualizaColores();
             enviarIntensidadBluetooth(configuracion.getIntensidad());
         }
     }
@@ -268,6 +270,16 @@ public class MainFragment extends Fragment {
 
     private void actualizaColores() {
         int intensidadInt = configuracion.getIntensidad().intValue();
+        Drawable thumb;
+
+        if (intensidadInt >= 80) {
+            thumb = mainActivity.getResources().getDrawable(R.drawable.thumb_red);
+        } else if (intensidadInt <= 50) {
+            thumb = mainActivity.getResources().getDrawable(R.drawable.thumb_green);
+        } else {
+            thumb = mainActivity.getResources().getDrawable(R.drawable.thumb_orange);
+        }
+        sbIntensidad.setThumb(thumb);
 
         if (intensidadInt + 5 >= 80) {
             fabAumentarIntensidad.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorRed)));
@@ -275,7 +287,7 @@ public class MainFragment extends Fragment {
         if (intensidadInt + 5 >= 5 && intensidadInt + 5 <= 75) {
             fabAumentarIntensidad.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorOrange)));
         }
-        if (intensidadInt + 5 <= 45) {
+        if (intensidadInt + 5 <= 50) {
             fabAumentarIntensidad.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGreen)));
         }
 
@@ -285,7 +297,7 @@ public class MainFragment extends Fragment {
         if (intensidadInt - 5 >= 5 && intensidadInt - 5 <= 75) {
             fabDisminuirIntensidad.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorOrange)));
         }
-        if (intensidadInt - 5 <= 45) {
+        if (intensidadInt - 5 <= 50) {
             fabDisminuirIntensidad.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGreen)));
         }
     }

@@ -8,8 +8,11 @@
     <color name="colorSecondaryText">#727272</color>
     <color name="colorDivider">#B6B6B6</color>
     <color name="colorRed">#D32F2F</color>
+    <color name="colorRedSec">#50F44336</color>
     <color name="colorOrange">#F57C00</color>
+    <color name="colorOrangeSec">#50F57C00</color>
     <color name="colorGreen">#4CAF50</color>
+    <color name="colorGreenSec">#50388E3C</color>
     <color name="colorWhite">#FFFFFF</color>
     <color name="colorGray">#9E9E9E</color>
 </resources>

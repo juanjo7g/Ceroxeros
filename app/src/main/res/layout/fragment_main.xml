@@ -63,16 +63,19 @@
 
         <android.support.v7.widget.AppCompatSeekBar
             android:id="@+id/sbIntensidad"
-            android:layout_width="207dp"
+            android:layout_width="237dp"
             android:layout_height="wrap_content"
             android:layout_below="@+id/tvIntensidad"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
             android:layout_marginTop="107dp"
             android:max="100"
-            android:progress="40"
+            android:progress="0"
             android:progressDrawable="@drawable/custom_progress_bar"
-            android:rotation="270" />
+            android:rotation="270"
+            android:splitTrack="false"
+            android:thumb="@drawable/thumb_green" />
+
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/fabDisminuirIntensidad"
