@@ -15,4 +15,5 @@
     <color name="colorGreenSec">#50388E3C</color>
     <color name="colorWhite">#FFFFFF</color>
     <color name="colorGray">#9E9E9E</color>
+    <color name="colorGrayTrans">#B6B6B6</color>
 </resources>

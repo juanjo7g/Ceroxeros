@@ -281,23 +281,23 @@ public class MainFragment extends Fragment {
         }
         sbIntensidad.setThumb(thumb);
 
-        if (intensidadInt + 5 >= 80) {
+        if (intensidadInt + 10 >= 80) {
             fabAumentarIntensidad.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorRed)));
         }
-        if (intensidadInt + 5 >= 5 && intensidadInt + 5 <= 75) {
+        if (intensidadInt + 10 >= 10 && intensidadInt + 10 <= 70) {
             fabAumentarIntensidad.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorOrange)));
         }
-        if (intensidadInt + 5 <= 50) {
+        if (intensidadInt + 10 <= 50) {
             fabAumentarIntensidad.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGreen)));
         }
 
-        if (intensidadInt - 5 >= 80) {
+        if (intensidadInt - 10 >= 80) {
             fabDisminuirIntensidad.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorRed)));
         }
-        if (intensidadInt - 5 >= 5 && intensidadInt - 5 <= 75) {
+        if (intensidadInt - 10 >= 10 && intensidadInt - 10 <= 70) {
             fabDisminuirIntensidad.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorOrange)));
         }
-        if (intensidadInt - 5 <= 50) {
+        if (intensidadInt - 10 <= 50) {
             fabDisminuirIntensidad.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGreen)));
         }
     }
