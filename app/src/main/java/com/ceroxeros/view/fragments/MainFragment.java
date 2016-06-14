@@ -1,7 +1,9 @@
 package com.ceroxeros.view.fragments;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.bluetooth.BluetoothSocket;
+import android.content.DialogInterface;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -10,6 +12,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -17,6 +20,8 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
@@ -371,7 +376,27 @@ public class MainFragment extends Fragment {
             }
             return true;
         }
+        if (id == R.id.action_evaluar) {
+            evaluarConfiguracionActual();
+        }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void evaluarConfiguracionActual() {
+        //todo: validar conexion internet
+        final Dialog dialog = new Dialog(mainActivity);
+        dialog.setContentView(R.layout.dialog_evaluacion_configuracion);
+        dialog.setTitle("Calificar configuración actual");
+        dialog.show();
+        Button btnCancelar = (Button) dialog.findViewById(R.id.buttonCancelar);
+        btnCancelar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+
     }
 
     private class TaskGuardarConfiguracion extends AsyncTask<Void, Void, Void> {

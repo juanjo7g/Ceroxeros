@@ -16,4 +16,7 @@
     <string name="action_refrescar">Refrescar</string>
     <string name="facebook_app_id">1488888527803999</string>
     <string name="signed_in_fmt">Signed in as: %s</string>
+    <string name="titulo_evaluar_configuracion">Evaluar Configuracion</string>
+    <string name="titulo_dialogo_calificar_configuracion">Califica la configuración actual:</string>
+    <string name="sugerencia">Sugerencia (Opcional):</string>
 </resources>
