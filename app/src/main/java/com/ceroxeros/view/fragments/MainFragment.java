@@ -8,6 +8,7 @@ import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -22,6 +23,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RatingBar;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
@@ -29,6 +31,8 @@ import com.ceroxeros.modelo.Configuracion;
 import com.ceroxeros.rest.ServiceGenerator;
 import com.ceroxeros.rest.model.Configuration;
 import com.ceroxeros.rest.services.ConfigurationService;
+import com.ceroxeros.rest.services.QualificationService;
+import com.ceroxeros.util.Utility;
 import com.j256.ormlite.dao.Dao;
 import com.juan.electrocontrolapp.R;
 import com.ceroxeros.view.activity.MainActivity;
@@ -37,6 +41,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.sql.BatchUpdateException;
 import java.sql.SQLException;
 import java.util.Date;
 
@@ -383,15 +388,49 @@ public class MainFragment extends Fragment {
     }
 
     private void evaluarConfiguracionActual() {
-        //todo: validar conexion internet
+        if (!Utility.isOnline()){
+            mostrarMensajeToast("Esta funcionalidad requiere conexión a internet.");
+            return;
+        }
         final Dialog dialog = new Dialog(mainActivity);
         dialog.setContentView(R.layout.dialog_evaluacion_configuracion);
         dialog.setTitle("Calificar configuración actual");
         dialog.show();
         Button btnCancelar = (Button) dialog.findViewById(R.id.buttonCancelar);
+        Button btnEnviar = (Button) dialog.findViewById(R.id.buttonEnviar);
+        final RatingBar rbCantidad = (RatingBar) dialog.findViewById(R.id.ratingBarCalificacion);
+        final EditText etSugerencia = (EditText) dialog.findViewById(R.id.editTextSugerencia);
+
         btnCancelar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+        btnEnviar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String sugerencia = "";
+                if (etSugerencia.getText() != null) {
+                    sugerencia = etSugerencia.getText().toString();
+                }
+                QualificationService qualificationService = ServiceGenerator.getQualificationService();
+                qualificationService.crearCalificacion(configuracion.getModo(),
+                        configuracion.getIntensidad(),
+                        rbCantidad.getRating(),
+                        sugerencia,
+                        new Callback<Response>() {
+                            @Override
+                            public void success(Response response, Response response2) {
+                            }
+
+                            @Override
+                            public void failure(RetrofitError error) {
+                            }
+                        });
+                //Todo: cambiar por alertdialog
+                mostrarMensajeToast("Gracias por su calificación.");
                 dialog.dismiss();
             }
         });
@@ -542,7 +581,6 @@ public class MainFragment extends Fragment {
     }
 
     void mostrarMensaje(String s) {
-//        Toast.makeText(getActivity(), s, Toast.LENGTH_SHORT).show();
         if (getView() != null) {
             Snackbar.make(getView(), s, Snackbar.LENGTH_LONG).show();
         }

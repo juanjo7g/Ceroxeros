@@ -1,6 +1,7 @@
 package com.ceroxeros.rest;
 
 import com.ceroxeros.rest.services.ConfigurationService;
+import com.ceroxeros.rest.services.QualificationService;
 import com.ceroxeros.rest.services.UserService;
 import com.squareup.okhttp.OkHttpClient;
 
@@ -24,12 +25,17 @@ public class ServiceGenerator {
 
     private static final UserService USER_SERVICE = REST_ADAPTER.create(UserService.class);
     private static final ConfigurationService CONFIGURATION_SERVICE = REST_ADAPTER.create(ConfigurationService.class);
+    private static final QualificationService QUALIFICATION_SERVICE = REST_ADAPTER.create(QualificationService.class);
 
-    public static UserService getUserService(){
+    public static UserService getUserService() {
         return USER_SERVICE;
     }
 
     public static ConfigurationService getConfigurationService() {
         return CONFIGURATION_SERVICE;
+    }
+
+    public static QualificationService getQualificationService() {
+        return QUALIFICATION_SERVICE;
     }
 }
