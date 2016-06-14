@@ -20,6 +20,8 @@ public class Usuario {
     public static final String FECHA_NACIMIENTO = "fecha_nacimiento";
     public static final String CORREO = "correo";
     public static final String FOTO = "foto";
+    public static final String USER_FB_ID = "user_fb_id";
+
 
     public static final String SINCRONIZADO = "sincronizado";
 
@@ -41,6 +43,8 @@ public class Usuario {
     private String correo;
     @DatabaseField(columnName = FOTO, dataType = DataType.BYTE_ARRAY)
     private byte[] foto;
+    @DatabaseField(columnName = USER_FB_ID)
+    private String userFbId;
 
     @DatabaseField(columnName = SINCRONIZADO)
     private Boolean sincronizado = Boolean.FALSE;
@@ -64,6 +68,9 @@ public class Usuario {
             }
             if (user.getToken() != null) {
                 token = user.getToken();
+            }
+            if (user.getUserFbId() != null) {
+                userFbId = user.getUserFbId();
             }
         }
     }

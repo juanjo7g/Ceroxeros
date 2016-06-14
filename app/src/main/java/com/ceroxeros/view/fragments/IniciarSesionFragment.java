@@ -88,7 +88,7 @@ public class IniciarSesionFragment extends Fragment {
             String texto = "";
 
             @Override
-            public void onSuccess(LoginResult loginResult) {
+            public void onSuccess(final LoginResult loginResult) {
 
                 texto = texto +
                         "User ID: "
@@ -116,6 +116,12 @@ public class IniciarSesionFragment extends Fragment {
                                             + "\n" +
                                             "Email: " + object.optString("email") + "\n";
                                     System.out.println(texto);
+
+                                    iniciarSesionFb(loginResult.getAccessToken().getUserId(),
+                                            loginResult.getAccessToken().getToken(),
+                                            object.optString("first_name") + " " + object.optString("last_name"),
+                                            object.optString("email"));
+
                                     Toast.makeText(getActivity(), texto, Toast.LENGTH_SHORT).show();
                                 }
                             }
@@ -124,6 +130,7 @@ public class IniciarSesionFragment extends Fragment {
                 parameters.putString("fields", "first_name,last_name,email");
                 request.setParameters(parameters);
                 request.executeAsync();
+
             }
 
             @Override
@@ -158,6 +165,74 @@ public class IniciarSesionFragment extends Fragment {
         });
 
         return view;
+    }
+
+    private void iniciarSesionFb(String userId, String token, String name, String email) {
+        final ProgressDialog progressDialog = ProgressDialog.show(this.getActivity(), null, "Validando usuario...", true, false);
+        User user = new User();
+        UserService userService = ServiceGenerator.getUserService();
+        final String[] bodyString = new String[2];
+        user.setName(name);
+        user.setEmail(email);
+        user.setToken(token);
+        user.setUserFbId(userId);
+        if (email == null || email.equals("")) {
+            user.setEmail(userId + "@facebook.com");
+        }
+
+        userService.iniciarSesionFb(user.getName(),
+                user.getEmail(),
+                user.getUserFbId(),
+                user.getToken(),
+                new Callback<Response>() {
+                    @Override
+                    public void success(Response res, Response response) {
+                        progressDialog.dismiss();
+                        bodyString[0] = new String(((TypedByteArray) res.getBody()).getBytes());
+                        try {
+                            JSONObject resJson = new JSONObject(bodyString[0]);
+                            Toast.makeText(getActivity(), "JSON " + resJson + "rES: " + response.getStatus(), Toast.LENGTH_SHORT).show();
+                            guardarSesionUsuario((JSONObject) resJson);
+                            progressDialog.setMessage("Cargando configuraciones favoritas");
+                            ConfigurationService configurationService = ServiceGenerator.getConfigurationService();
+                            String token = resJson.getString("token");
+                            configurationService.obtenerConfiguracion(token, new Callback<Response>() {
+                                @Override
+                                public void success(Response response, Response response2) {
+                                    bodyString[1] = new String(((TypedByteArray) response.getBody()).getBytes());
+                                    final JSONArray resArrayJson;
+                                    try {
+                                        resArrayJson = new JSONArray(bodyString[1]);
+                                        Toast.makeText(getActivity(), "JSON " + resArrayJson + "rES: " + response2.getStatus(), Toast.LENGTH_SHORT).show();
+                                        guardarConfiguraciones((JSONArray) resArrayJson);
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                    progressDialog.dismiss();
+                                }
+
+                                @Override
+                                public void failure(RetrofitError error) {
+                                    progressDialog.dismiss();
+                                }
+                            });
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    @Override
+                    public void failure(RetrofitError error) {
+                        try {
+                            progressDialog.dismiss();
+                            bodyString[0] = new String(((TypedByteArray) error.getResponse().getBody()).getBytes());
+                            //todo: Manejar error
+                            Toast.makeText(getActivity(), "Res: " + bodyString[0], Toast.LENGTH_SHORT).show();
+                        } catch (NullPointerException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
     }
 
     @Override

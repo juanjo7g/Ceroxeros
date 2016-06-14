@@ -12,6 +12,7 @@ public class User {
     private String email;
     private String name;
     private String token;
+    private String userFbId;
 
     public String get_id() {
         return _id;
@@ -75,6 +76,14 @@ public class User {
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    public String getUserFbId() {
+        return userFbId;
+    }
+
+    public void setUserFbId(String userFbId) {
+        this.userFbId = userFbId;
     }
 
     @Override

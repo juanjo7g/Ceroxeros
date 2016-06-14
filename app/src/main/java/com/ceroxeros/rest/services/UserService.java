@@ -21,6 +21,14 @@ public interface UserService {
                       @Field("email") String email,
                       Callback<Response> callback);
 
+    @FormUrlEncoded
+    @POST("/api/v1/user/loginFb")
+    void iniciarSesionFb(@Field("name") String name,
+                         @Field("email") String email,
+                         @Field("userFbId") String userFbId,
+                         @Field("token") String token,
+                         Callback<Response> callback);
+
     @GET("/api/v1/user/login")
     void iniciarSesion(@Query("username") String username,
                        @Query("password") String password,
