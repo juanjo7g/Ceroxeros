@@ -8,6 +8,7 @@ import android.widget.Toast;
 
 import com.ceroxeros.helper.DBHelper;
 import com.ceroxeros.modelo.Configuracion;
+import com.ceroxeros.modelo.Usuario;
 import com.ceroxeros.rest.ServiceGenerator;
 import com.ceroxeros.rest.model.Configuration;
 import com.ceroxeros.rest.services.ConfigurationService;
@@ -19,7 +20,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.sql.SQLException;
-import java.util.Date;
 import java.util.List;
 
 import retrofit.Callback;
@@ -33,14 +33,17 @@ import retrofit.mime.TypedByteArray;
 public class NetworkChangeReceiver extends BroadcastReceiver {
     private Context context = null;
     private Dao daoConfiguracion = null;
+    private Dao daoUsuario;
     private DBHelper helper = null;
+    private Usuario usuarioActual;
+
 
     @Override
     public void onReceive(Context context, Intent intent) {
         if (Utility.isOnline()) {
-            Toast.makeText(context, "Cambio.....", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(context, "Cambio.....", Toast.LENGTH_SHORT).show();
             this.context = context;
-            new TaskGuardarConfiguracion().execute();
+            new TaskSincronizarConfiguraciones().execute();
         }
     }
 
@@ -51,7 +54,7 @@ public class NetworkChangeReceiver extends BroadcastReceiver {
         return helper;
     }
 
-    private class TaskGuardarConfiguracion extends AsyncTask<Void, Void, Void> {
+    private class TaskSincronizarConfiguraciones extends AsyncTask<Void, Void, Void> {
         List<Configuracion> listaConfiguracionesASincronizar = null;
         Configuracion configuracionASincronizar = null;
         Configuration configurationToSync = null;
@@ -67,6 +70,15 @@ public class NetworkChangeReceiver extends BroadcastReceiver {
                 listaConfiguracionesASincronizar = daoConfiguracion.queryForAll();
                 for (int i = 0; i < listaConfiguracionesASincronizar.size(); i++) {
                     configuracionASincronizar = listaConfiguracionesASincronizar.get(i);
+                    if (!configuracionASincronizar.getSincronizado()
+                            && getUsuarioActual() != null) {
+                        if (!configuracionASincronizar.getEliminado()) {
+                            guardarConfiguracion(configuracionASincronizar);
+                        }
+                        if (configuracionASincronizar.getEliminado()) {
+                            eliminarConfiguracion(configuracionASincronizar);
+                        }
+                    }
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -77,5 +89,78 @@ public class NetworkChangeReceiver extends BroadcastReceiver {
         @Override
         protected void onPostExecute(Void result) {
         }
+    }
+
+    private void guardarConfiguracion(final Configuracion configuracionASincronizar) {
+        final String[] bodyString = new String[1];
+        ConfigurationService configurationService = ServiceGenerator.getConfigurationService();
+        Configuration configuration = new Configuration(configuracionASincronizar);
+        configurationService.crearConfiguracion("Configuración " + configuracionASincronizar.getIdLocal(),
+                configuration.getMode(),
+                configuration.getIntensity(),
+                usuarioActual.getToken(),
+                new Callback<Response>() {
+                    @Override
+                    public void success(Response res, Response response) {
+                        bodyString[0] = new String(((TypedByteArray) res.getBody()).getBytes());
+                        try {
+                            JSONObject resJson = new JSONObject(bodyString[0]);
+                            if ((Boolean) resJson.get("success")) {
+                                configuracionASincronizar.setSincronizado(true);
+                                daoConfiguracion.update(configuracionASincronizar);
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    @Override
+                    public void failure(RetrofitError error) {
+                    }
+                });
+    }
+
+    private void eliminarConfiguracion(final Configuracion configuracionASincronizar) {
+        final String[] bodyString = new String[1];
+        ConfigurationService configurationService = ServiceGenerator.getConfigurationService();
+        Configuration configuration = new Configuration(configuracionASincronizar);
+        configurationService.eliminarConfiguracion(configuration.get_id(),
+                usuarioActual.getToken(),
+                new Callback<Response>() {
+                    @Override
+                    public void success(Response response, Response response2) {
+                        bodyString[0] = new String(((TypedByteArray) response.getBody()).getBytes());
+                        try {
+                            JSONObject resJson = new JSONObject(bodyString[0]);
+                            if ((Boolean) resJson.get("success")) {
+                                configuracionASincronizar.setSincronizado(true);
+                                daoConfiguracion.update(configuracionASincronizar);
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    @Override
+                    public void failure(RetrofitError error) {
+                    }
+                });
+    }
+
+    public Usuario getUsuarioActual() {
+        try {
+            daoUsuario = getHelper().getUsuarioDao();
+            usuarioActual = (Usuario) daoUsuario.queryForId(1);
+            if (usuarioActual != null && usuarioActual.getToken() != null) {
+                return usuarioActual;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
