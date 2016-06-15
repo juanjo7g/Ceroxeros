@@ -14,6 +14,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -172,6 +173,7 @@ public class MainFragment extends Fragment {
                 configuracion.setIdLocal(-1);
                 configuracion.setModo("A");
                 configuracion.setIntensidad((float) 0);
+                configuracion.setSincronizado(true);
             }
         }
         if (configuracion.getIdLocal() > 0) {
@@ -453,6 +455,7 @@ public class MainFragment extends Fragment {
                 configuracionAGuardar.setIntensidad(configuracion.getIntensidad());
                 configuracionAGuardar.setModo(configuracion.getModo());
                 configuracionAGuardar.setFechaCreacion(new Date());
+                configuracionAGuardar.setSincronizado(false);
                 daoConfiguracion.create(configuracionAGuardar);
                 if (mainActivity.getUsuarioActual() != null) {
                     final String[] bodyString = new String[1];
@@ -472,14 +475,13 @@ public class MainFragment extends Fragment {
                                         JSONObject resJson = new JSONObject(bodyString[0]);
                                         if ((Boolean) resJson.get("success")) {
                                             configuracionAGuardar.setSincronizado(true);
-                                            try {
-                                                daoConfiguracion = mainActivity.getHelper().getConfiguracionDao();
-                                                daoConfiguracion.update(configuracionAGuardar);
-                                            } catch (SQLException e) {
-                                                e.printStackTrace();
-                                            }
+                                            configuracionAGuardar.setIdRemoto(resJson.getJSONObject("data").getString("_id"));
+                                            daoConfiguracion = mainActivity.getHelper().getConfiguracionDao();
+                                            daoConfiguracion.update(configuracionAGuardar);
                                         }
                                     } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    } catch (SQLException e) {
                                         e.printStackTrace();
                                     }
                                 }
@@ -488,10 +490,7 @@ public class MainFragment extends Fragment {
                                 public void failure(RetrofitError error) {
                                     try {
                                         bodyString[0] = new String(((TypedByteArray) error.getResponse().getBody()).getBytes());
-                                        configuracion.setSincronizado(false);
-                                        daoConfiguracion = mainActivity.getHelper().getConfiguracionDao();
-                                        daoConfiguracion.update(configuracionAGuardar);
-                                    } catch (SQLException | NullPointerException e) {
+                                    } catch (NullPointerException e) {
                                         e.printStackTrace();
                                     }
                                 }
@@ -513,6 +512,7 @@ public class MainFragment extends Fragment {
     }
 
     private class TaskEliminarConfiguracion extends AsyncTask<Void, Void, Void> {
+        Configuracion configuracionAEliminar = null;
 
         @Override
         protected void onPreExecute() {
@@ -522,12 +522,13 @@ public class MainFragment extends Fragment {
         protected Void doInBackground(Void... params) {
             try {
                 daoConfiguracion = mainActivity.getHelper().getConfiguracionDao();
-                configuracion.setEliminado(true);
-                configuracion.setSincronizado(false);
-                daoConfiguracion.update(configuracion);
+                configuracionAEliminar = (Configuracion) daoConfiguracion.queryForId(configuracion.getIdLocal());
+                configuracionAEliminar.setEliminado(true);
+                configuracionAEliminar.setSincronizado(false);
+                daoConfiguracion.update(configuracionAEliminar);
                 if (mainActivity.getUsuarioActual() != null) {
                     final String[] bodyString = new String[1];
-                    final String idConfiguracion = configuracion.getIdRemoto();
+                    final String idConfiguracion = configuracionAEliminar.getIdRemoto();
                     ConfigurationService configurationService = ServiceGenerator.getConfigurationService();
                     configurationService.eliminarConfiguracion(idConfiguracion,
                             mainActivity.getUsuarioActual().getToken(),
@@ -538,15 +539,13 @@ public class MainFragment extends Fragment {
                                     try {
                                         JSONObject resJson = new JSONObject(bodyString[0]);
                                         if ((Boolean) resJson.get("success")) {
-                                            configuracion.setSincronizado(true);
-                                            try {
-                                                daoConfiguracion = mainActivity.getHelper().getConfiguracionDao();
-                                                daoConfiguracion.update(configuracion);
-                                            } catch (SQLException e) {
-                                                e.printStackTrace();
-                                            }
+                                            configuracionAEliminar.setSincronizado(true);
+                                            daoConfiguracion = mainActivity.getHelper().getConfiguracionDao();
+                                            daoConfiguracion.update(configuracionAEliminar);
                                         }
                                     } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    } catch (SQLException e) {
                                         e.printStackTrace();
                                     }
                                 }
@@ -555,10 +554,7 @@ public class MainFragment extends Fragment {
                                 public void failure(RetrofitError error) {
                                     try {
                                         bodyString[0] = new String(((TypedByteArray) error.getResponse().getBody()).getBytes());
-                                        configuracion.setSincronizado(false);
-                                        daoConfiguracion = mainActivity.getHelper().getConfiguracionDao();
-                                        daoConfiguracion.update(configuracion);
-                                    } catch (SQLException | NullPointerException e) {
+                                    } catch (NullPointerException e) {
                                         e.printStackTrace();
                                     }
                                 }

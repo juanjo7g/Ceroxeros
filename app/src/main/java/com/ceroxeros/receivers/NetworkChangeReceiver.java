@@ -71,7 +71,8 @@ public class NetworkChangeReceiver extends BroadcastReceiver {
                 for (int i = 0; i < listaConfiguracionesASincronizar.size(); i++) {
                     configuracionASincronizar = listaConfiguracionesASincronizar.get(i);
                     if (!configuracionASincronizar.getSincronizado()
-                            && getUsuarioActual() != null) {
+                            && getUsuarioActual() != null
+                            && configuracionASincronizar.getIdLocal() != -1) {
                         if (!configuracionASincronizar.getEliminado()) {
                             guardarConfiguracion(configuracionASincronizar);
                         }
@@ -107,6 +108,7 @@ public class NetworkChangeReceiver extends BroadcastReceiver {
                             JSONObject resJson = new JSONObject(bodyString[0]);
                             if ((Boolean) resJson.get("success")) {
                                 configuracionASincronizar.setSincronizado(true);
+                                configuracionASincronizar.setIdRemoto(resJson.getJSONObject("data").getString("_id"));
                                 daoConfiguracion.update(configuracionASincronizar);
                             }
                         } catch (JSONException e) {
