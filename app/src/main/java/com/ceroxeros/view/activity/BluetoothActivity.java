@@ -2,8 +2,11 @@ package com.ceroxeros.view.activity;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.provider.Settings;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -55,17 +58,13 @@ public class BluetoothActivity extends AppCompatActivity {
         myBluetooth = BluetoothAdapter.getDefaultAdapter();
 
         if (myBluetooth == null) {
-            //Show a mensag. that the device has no bluetooth adapter
             Toast.makeText(getApplicationContext(), "Bluetooth Device Not Available", Toast.LENGTH_LONG).show();
-
-            //finish apk
             finish();
         } else if (!myBluetooth.isEnabled()) {
-            //Ask to the user turn the bluetooth on
             Intent turnBTon = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(turnBTon, 1);
         }
-        setTitle("Dispositivos Emparejados");
+        setTitle(getString(R.string.titulo_dispositivos_emparejados));
     }
 
     private void pairedDevicesList() {
@@ -116,10 +115,22 @@ public class BluetoothActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         if (id == R.id.action_emparejar_dispositivo) {
-            Toast.makeText(BluetoothActivity.this, "Selecciona el dispositivo que desea emparejar por primer vez", Toast.LENGTH_LONG).show();
-            Intent intentOpenBluetoothSettings = new Intent();
-            intentOpenBluetoothSettings.setAction(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS);
-            startActivity(intentOpenBluetoothSettings);
+            new AlertDialog.Builder(this)
+                    .setTitle(getString(R.string.titulo_emparejar_dispositivo))
+                    .setMessage(R.string.mensaje_emparejar_dispositivo)
+                    .setPositiveButton(R.string.boton_aceptar, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            Intent intentOpenBluetoothSettings = new Intent();
+                            intentOpenBluetoothSettings.setAction(Settings.ACTION_BLUETOOTH_SETTINGS);
+                            startActivity(intentOpenBluetoothSettings);
+                        }
+                    })
+                    .setNegativeButton(getString(R.string.boton_cancelar), new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                        }
+                    })
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
             return true;
         }
         if (id == R.id.action_refrescar) {

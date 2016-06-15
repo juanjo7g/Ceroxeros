@@ -2,9 +2,11 @@ package com.ceroxeros.view.fragments;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +21,7 @@ import com.ceroxeros.rest.model.Configuration;
 import com.ceroxeros.rest.model.User;
 import com.ceroxeros.rest.services.ConfigurationService;
 import com.ceroxeros.rest.services.UserService;
+import com.ceroxeros.util.Utility;
 import com.ceroxeros.view.activity.CrearUsuarioActivity;
 import com.ceroxeros.view.activity.MainActivity;
 import com.facebook.CallbackManager;
@@ -85,22 +88,9 @@ public class IniciarSesionFragment extends Fragment {
         loginButtonFacebook.setFragment(this);
 
         loginButtonFacebook.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
-            String texto = "";
 
             @Override
             public void onSuccess(final LoginResult loginResult) {
-
-                texto = texto +
-                        "User ID: "
-                        + loginResult.getAccessToken().getUserId()
-                        + "\n" +
-                        "Auth Token: "
-                        + loginResult.getAccessToken().getToken()
-                        + "\n" +
-                        "Token Duration: "
-                        + loginResult.getAccessToken().getExpires()
-                        + "\n";
-
                 GraphRequest request = GraphRequest.newMeRequest(
                         loginResult.getAccessToken(),
                         new GraphRequest.GraphJSONObjectCallback() {
@@ -111,18 +101,10 @@ public class IniciarSesionFragment extends Fragment {
                                 if (response.getError() != null) {
 
                                 } else {
-                                    texto = texto +
-                                            "Nombre: " + object.optString("first_name") + " " + object.optString("last_name")
-                                            + "\n" +
-                                            "Email: " + object.optString("email") + "\n";
-                                    System.out.println(texto);
-
                                     iniciarSesionFb(loginResult.getAccessToken().getUserId(),
                                             loginResult.getAccessToken().getToken(),
                                             object.optString("first_name") + " " + object.optString("last_name"),
                                             object.optString("email"));
-
-                                    Toast.makeText(getActivity(), texto, Toast.LENGTH_SHORT).show();
                                 }
                             }
                         });
@@ -149,9 +131,12 @@ public class IniciarSesionFragment extends Fragment {
         buttonCrearUsuario.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Todo: validar que tenga conexion a internet
-                Intent i = new Intent(getActivity(), CrearUsuarioActivity.class);
-                startActivity(i);
+                if (!Utility.isOnline()) {
+                    mostrarToast(mainActivity.getString(R.string.mensaje_error_requiere_internet));
+                } else {
+                    Intent i = new Intent(getActivity(), CrearUsuarioActivity.class);
+                    startActivity(i);
+                }
             }
         });
         etNombreUsuario = (EditText) view.findViewById(R.id.etFragmentIniciarSesionUsuario);
@@ -168,7 +153,7 @@ public class IniciarSesionFragment extends Fragment {
     }
 
     private void iniciarSesionFb(String userId, String token, String name, String email) {
-        final ProgressDialog progressDialog = ProgressDialog.show(this.getActivity(), null, "Validando usuario...", true, false);
+        final ProgressDialog progressDialog = ProgressDialog.show(this.getActivity(), null, mainActivity.getString(R.string.mensaje_progreso_validando_usuario), true, false);
         User user = new User();
         UserService userService = ServiceGenerator.getUserService();
         final String[] bodyString = new String[2];
@@ -187,13 +172,11 @@ public class IniciarSesionFragment extends Fragment {
                 new Callback<Response>() {
                     @Override
                     public void success(Response res, Response response) {
-                        progressDialog.dismiss();
-                        bodyString[0] = new String(((TypedByteArray) res.getBody()).getBytes());
                         try {
+                            bodyString[0] = new String(((TypedByteArray) res.getBody()).getBytes());
                             JSONObject resJson = new JSONObject(bodyString[0]);
-                            Toast.makeText(getActivity(), "JSON " + resJson + "rES: " + response.getStatus(), Toast.LENGTH_SHORT).show();
-                            guardarSesionUsuario((JSONObject) resJson);
-                            progressDialog.setMessage("Cargando configuraciones favoritas");
+                            guardarSesionUsuario(resJson);
+                            progressDialog.setMessage(getString(R.string.mensaje_progreso_cargando_configuraciones));
                             ConfigurationService configurationService = ServiceGenerator.getConfigurationService();
                             String token = resJson.getString("token");
                             configurationService.obtenerConfiguracion(token, new Callback<Response>() {
@@ -203,8 +186,7 @@ public class IniciarSesionFragment extends Fragment {
                                     final JSONArray resArrayJson;
                                     try {
                                         resArrayJson = new JSONArray(bodyString[1]);
-                                        Toast.makeText(getActivity(), "JSON " + resArrayJson + "rES: " + response2.getStatus(), Toast.LENGTH_SHORT).show();
-                                        guardarConfiguraciones((JSONArray) resArrayJson);
+                                        guardarConfiguraciones(resArrayJson);
                                     } catch (JSONException e) {
                                         e.printStackTrace();
                                     }
@@ -214,6 +196,7 @@ public class IniciarSesionFragment extends Fragment {
                                 @Override
                                 public void failure(RetrofitError error) {
                                     progressDialog.dismiss();
+                                    mostrarToast(getString(R.string.mensaje_error_cargando_configuraciones));
                                 }
                             });
                         } catch (JSONException e) {
@@ -223,17 +206,12 @@ public class IniciarSesionFragment extends Fragment {
 
                     @Override
                     public void failure(RetrofitError error) {
-                        try {
-                            progressDialog.dismiss();
-                            bodyString[0] = new String(((TypedByteArray) error.getResponse().getBody()).getBytes());
-                            //todo: Manejar error
-                            Toast.makeText(getActivity(), "Res: " + bodyString[0], Toast.LENGTH_SHORT).show();
-                        } catch (NullPointerException e) {
-                            e.printStackTrace();
-                        }
+                        progressDialog.dismiss();
+                        mostrarAlertDialog(mainActivity.getString(R.string.mensaje_error_iniciando_sesion_fb));
                     }
                 });
     }
+
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -243,7 +221,8 @@ public class IniciarSesionFragment extends Fragment {
     }
 
     private void iniciarSesion() {
-        final ProgressDialog progressDialog = ProgressDialog.show(this.getActivity(), null, "Iniciando sesion...", true, false);
+        final ProgressDialog progressDialog = ProgressDialog.show(this.getActivity(), null,
+                mainActivity.getString(R.string.mensaje_progreso_iniciando_sesion), true, false);
         User user = new User();
         UserService userService = ServiceGenerator.getUserService();
         final String[] bodyString = new String[2];
@@ -255,12 +234,11 @@ public class IniciarSesionFragment extends Fragment {
                 new Callback<Response>() {
                     @Override
                     public void success(Response user, Response response) {
-                        bodyString[0] = new String(((TypedByteArray) user.getBody()).getBytes());
                         try {
+                            bodyString[0] = new String(((TypedByteArray) user.getBody()).getBytes());
                             final JSONObject resJson = new JSONObject(bodyString[0]);
-                            Toast.makeText(getActivity(), "JSON " + resJson + "rES: " + response.getStatus(), Toast.LENGTH_SHORT).show();
-                            guardarSesionUsuario((JSONObject) resJson);
-                            progressDialog.setMessage("Cargando configuraciones favoritas");
+                            guardarSesionUsuario(resJson);
+                            progressDialog.setMessage(getString(R.string.mensaje_progreso_cargando_configuraciones));
                             ConfigurationService configurationService = ServiceGenerator.getConfigurationService();
                             String token = resJson.getString("token");
                             configurationService.obtenerConfiguracion(token, new Callback<Response>() {
@@ -270,8 +248,7 @@ public class IniciarSesionFragment extends Fragment {
                                     final JSONArray resArrayJson;
                                     try {
                                         resArrayJson = new JSONArray(bodyString[1]);
-                                        Toast.makeText(getActivity(), "JSON " + resArrayJson + "rES: " + response2.getStatus(), Toast.LENGTH_SHORT).show();
-                                        guardarConfiguraciones((JSONArray) resArrayJson);
+                                        guardarConfiguraciones(resArrayJson);
                                     } catch (JSONException e) {
                                         e.printStackTrace();
                                     }
@@ -281,6 +258,7 @@ public class IniciarSesionFragment extends Fragment {
                                 @Override
                                 public void failure(RetrofitError error) {
                                     progressDialog.dismiss();
+                                    mostrarToast(getString(R.string.mensaje_error_cargando_configuraciones));
                                 }
                             });
 
@@ -294,9 +272,11 @@ public class IniciarSesionFragment extends Fragment {
                         try {
                             progressDialog.dismiss();
                             bodyString[0] = new String(((TypedByteArray) error.getResponse().getBody()).getBytes());
-                            //todo: Manejar error
-                            Toast.makeText(getActivity(), "Res: " + bodyString[0], Toast.LENGTH_SHORT).show();
+                            JSONObject errorJson = new JSONObject(bodyString[0]);
+                            mostrarToast(errorJson.getString("data"));
                         } catch (NullPointerException e) {
+                            e.printStackTrace();
+                        } catch (JSONException e) {
                             e.printStackTrace();
                         }
                     }
@@ -337,7 +317,6 @@ public class IniciarSesionFragment extends Fragment {
         try {
             Gson gson = new Gson();
             User user = gson.fromJson(userJson.toString(), User.class);
-            Toast.makeText(getActivity(), user.toString(), Toast.LENGTH_SHORT).show();
             Usuario usuario = new Usuario(user);
             dao = mainActivity.getHelper().getUsuarioDao();
             usuario.setIdLocal(1);
@@ -348,5 +327,21 @@ public class IniciarSesionFragment extends Fragment {
         }
     }
 
+    private void mostrarToast(String s) {
+        Toast.makeText(getActivity(), s, Toast.LENGTH_SHORT).show();
+    }
+
+    private void mostrarAlertDialog(String s) {
+        new AlertDialog.Builder(getActivity())
+                .setTitle(mainActivity.getString(R.string.error))
+                .setMessage(s)
+                .setPositiveButton(mainActivity.getString(R.string.boton_aceptar), new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show();
+    }
 
 }

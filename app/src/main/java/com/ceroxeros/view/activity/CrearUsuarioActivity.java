@@ -48,7 +48,7 @@ public class CrearUsuarioActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_crear_usuario);
 
-        ActionBar actionBar = ((AppCompatActivity) this).getSupportActionBar();
+        ActionBar actionBar = this.getSupportActionBar();
 
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
@@ -95,7 +95,6 @@ public class CrearUsuarioActivity extends AppCompatActivity {
                         try {
                             JSONObject resJson = new JSONObject(bodyString[0]);
                             if ((Boolean) resJson.get("success")) {
-                                Toast.makeText(CrearUsuarioActivity.this, "JSON " + resJson.get("data") + "rES: " + response.getStatus(), Toast.LENGTH_SHORT).show();
                                 guardarSesionUsuario((JSONObject) resJson.get("data"));
                             }
                         } catch (JSONException e) {
@@ -108,8 +107,6 @@ public class CrearUsuarioActivity extends AppCompatActivity {
                         try {
                             progressDialog.dismiss();
                             bodyString[0] = new String(((TypedByteArray) error.getResponse().getBody()).getBytes());
-                            //todo: Manejar error
-                            Toast.makeText(CrearUsuarioActivity.this, "Res: " + bodyString[0], Toast.LENGTH_SHORT).show();
                         } catch (NullPointerException e) {
                             e.printStackTrace();
                         }

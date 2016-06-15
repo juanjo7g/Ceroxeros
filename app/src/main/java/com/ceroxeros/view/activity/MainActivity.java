@@ -4,11 +4,13 @@ import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -27,10 +29,11 @@ import com.ceroxeros.modelo.Configuracion;
 import com.ceroxeros.modelo.Dispositivo;
 import com.ceroxeros.modelo.Usuario;
 import com.ceroxeros.util.Utility;
+import com.facebook.AccessToken;
+import com.facebook.FacebookSdk;
+import com.facebook.login.LoginManager;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.Dao;
-import com.j256.ormlite.stmt.DeleteBuilder;
-import com.j256.ormlite.table.TableUtils;
 import com.juan.electrocontrolapp.R;
 import com.ceroxeros.helper.DBHelper;
 import com.ceroxeros.view.fragments.IniciarSesionFragment;
@@ -90,11 +93,13 @@ public class MainActivity extends AppCompatActivity
             menu = navigationView.getMenu();
         }
 
-        snackbarConexionBT = Snackbar.make(navigationView, "Sin dispositivo bluetooth conectado", Snackbar.LENGTH_INDEFINITE);
+        snackbarConexionBT = Snackbar.make(navigationView, R.string.mensaje_sin_dispositivo_conectado, Snackbar.LENGTH_INDEFINITE);
         snackbarConexionBT.show();
         inicializarMenuLateral(navigationView);
         inicializarMainFragment();
         inicializarConexion();
+
+        FacebookSdk.sdkInitialize(this.getApplicationContext());
     }
 
     private void inicializarMenuLateral(NavigationView navigationView) {
@@ -108,8 +113,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void inicializarMainFragment() {
-        Fragment fragment = null;
-        fragment = new MainFragment();
+        Fragment fragment = new MainFragment();
 
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.content_frame, fragment)
@@ -220,12 +224,12 @@ public class MainActivity extends AppCompatActivity
             if (Utility.isOnline()) {
                 fragment = new IniciarSesionFragment();
             } else {
-                Toast.makeText(MainActivity.this, "Sin Internet. Esta funcionalidad requiere conexión.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, getString(R.string.mensaje_error_requiere_internet), Toast.LENGTH_SHORT).show();
             }
         } else if (id == R.id.nav_cerrar_sesion) {
             fragment = new MainFragment();
             if (getSupportActionBar() != null) {
-                getSupportActionBar().setTitle("Ceroxeros");
+                getSupportActionBar().setTitle(R.string.app_name);
             }
             cerrarSesion();
         } else {
@@ -234,7 +238,7 @@ public class MainActivity extends AppCompatActivity
         if (fragment != null) {
             if (getSupportActionBar() != null) {
                 if (id == R.id.nav_cerrar_sesion) {
-                    getSupportActionBar().setTitle("Ceroxeros");
+                    getSupportActionBar().setTitle(R.string.app_name);
                 } else {
                     getSupportActionBar().setTitle(item.getTitle());
                 }
@@ -254,11 +258,10 @@ public class MainActivity extends AppCompatActivity
         List<Configuracion> listaConfiguraciones = null;
         Configuracion config;
         try {
-            Toast.makeText(MainActivity.this, "Cerrando sesión...", Toast.LENGTH_SHORT).show();
             daoUsuario = getHelper().getUsuarioDao();
             daoConfiguracion = getHelper().getConfiguracionDao();
             listaConfiguraciones = daoConfiguracion.queryForAll();
-            for (int i = 0; i<listaConfiguraciones.size(); i++){
+            for (int i = 0; i < listaConfiguraciones.size(); i++) {
                 config = listaConfiguraciones.get(i);
                 config.setUsuario(null);
                 daoConfiguracion.update(config);
@@ -269,7 +272,11 @@ public class MainActivity extends AppCompatActivity
                 daoUsuario.update(usuario);
                 actualizarSesionMenuLateral();
             }
-            Toast.makeText(MainActivity.this, "Sesión cerrada", Toast.LENGTH_SHORT).show();
+            AccessToken accessToken = AccessToken.getCurrentAccessToken();
+            if (accessToken != null) {
+                LoginManager.getInstance().logOut();
+            }
+            mostrarAlertDialog(getString(R.string.informacion), getString(R.string.mensaje_sesion_cerrada));
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -280,11 +287,11 @@ public class MainActivity extends AppCompatActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         if (data != null && data.getExtras() != null && data.getExtras().get("address") != null) {
-            Toast.makeText(MainActivity.this, "Llego la mac " + data.getExtras().get("address"), Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, "Mac " + data.getExtras().get("address"), Toast.LENGTH_SHORT).show();
             address = data.getExtras().get("address") + "";
             new ConnectBT().execute(); //Call the class to connect
         } else {
-            Toast.makeText(MainActivity.this, "No llego mac", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(MainActivity.this, "No llego mac", Toast.LENGTH_SHORT).show();
         }
 
         super.onActivityResult(requestCode, resultCode, data);
@@ -310,14 +317,14 @@ public class MainActivity extends AppCompatActivity
         inicializarMainFragment();
     }
 
-    private class ConnectBT extends AsyncTask<Void, Void, Void>  // UI thread
-    {
-        private boolean ConnectSuccess = true; //if it's here, it's almost connected
+    private class ConnectBT extends AsyncTask<Void, Void, Void> {
+        private boolean ConnectSuccess = true;
         private Dispositivo dispositivoActual = null;
 
         @Override
         protected void onPreExecute() {
-            progress = ProgressDialog.show(MainActivity.this, "Conectando...", "Por favor espere");  //show a progress dialog
+            progress = ProgressDialog.show(MainActivity.this, getString(R.string.mensaje_progreso_conectando_dispositivo),
+                    getString(R.string.mensaje_por_favor_espere));
         }
 
         @Override
@@ -457,5 +464,18 @@ public class MainActivity extends AppCompatActivity
             tvNombreNavHeader.setText("Usuario Invitado - Inicie Sesión");
             tvEmailNavHeader.setText("");
         }
+    }
+
+    private void mostrarAlertDialog(String t, String s) {
+        new AlertDialog.Builder(this)
+                .setTitle(t)
+                .setMessage(s)
+                .setPositiveButton(getString(R.string.boton_aceptar), new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .setIcon(android.R.drawable.ic_dialog_info)
+                .show();
     }
 }

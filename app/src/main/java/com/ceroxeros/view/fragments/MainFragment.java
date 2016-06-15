@@ -64,7 +64,6 @@ public class MainFragment extends Fragment {
     private Boolean favorito;
 
     private Dao daoConfiguracion;
-    private Dao daoUsuario;
 
     private Configuracion configuracion;
 
@@ -313,9 +312,10 @@ public class MainFragment extends Fragment {
     }
 
     public void mostrarMensajeConfiguracionActual() {
-        int intensidadF = (int) (configuracion.getIntensidad() / 10);
+        int intensidadInt = (int) (configuracion.getIntensidad() / 10);
         if (getView() != null) {
-            Snackbar.make(getView(), "Modo: " + configuracion.getModo() + " Intensidad: " + intensidadF,
+            Snackbar.make(getView(), mainActivity.getString(R.string.modo) + configuracion.getModo()
+                            + mainActivity.getString(R.string.intensidad) + intensidadInt,
                     Snackbar.LENGTH_SHORT).show();
         }
     }
@@ -328,7 +328,7 @@ public class MainFragment extends Fragment {
                 btSocket.getOutputStream().write(modo.getBytes());
                 mostrarMensajeConfiguracionActual();
             } catch (IOException e) {
-                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                mostrarMensajeToast(mainActivity.getString(R.string.mensaje_error_enviando_configuracion));
             }
         }
     }
@@ -350,7 +350,7 @@ public class MainFragment extends Fragment {
                 btSocket.getOutputStream().write(intensidadStr.getBytes());
                 mostrarMensajeConfiguracionActual();
             } catch (IOException e) {
-                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                mostrarMensajeToast(mainActivity.getString(R.string.mensaje_error_enviando_configuracion));
             }
         }
     }
@@ -388,13 +388,13 @@ public class MainFragment extends Fragment {
     }
 
     private void evaluarConfiguracionActual() {
-        if (!Utility.isOnline()){
-            mostrarMensajeToast("Esta funcionalidad requiere conexión a internet.");
+        if (!Utility.isOnline()) {
+            mostrarMensajeToast(getString(R.string.mensaje_error_requiere_internet));
             return;
         }
         final Dialog dialog = new Dialog(mainActivity);
         dialog.setContentView(R.layout.dialog_evaluacion_configuracion);
-        dialog.setTitle("Calificar configuración actual");
+        dialog.setTitle(R.string.titulo_calificar_configuracion);
         dialog.show();
         Button btnCancelar = (Button) dialog.findViewById(R.id.buttonCancelar);
         Button btnEnviar = (Button) dialog.findViewById(R.id.buttonEnviar);
@@ -411,7 +411,7 @@ public class MainFragment extends Fragment {
         btnEnviar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String sugerencia = "";
+                String sugerencia = null;
                 if (etSugerencia.getText() != null) {
                     sugerencia = etSugerencia.getText().toString();
                 }
@@ -429,8 +429,8 @@ public class MainFragment extends Fragment {
                             public void failure(RetrofitError error) {
                             }
                         });
-                //Todo: cambiar por alertdialog
-                mostrarMensajeToast("Gracias por su calificación.");
+                mostrarAlertDialog(getString(R.string.titulo_gracias_por_calificar),
+                        getString(R.string.mensaje_gracias_por_calificar));
                 dialog.dismiss();
             }
         });
@@ -460,7 +460,7 @@ public class MainFragment extends Fragment {
                     configuracionAGuardar.setUsuario(mainActivity.getUsuarioActual());
                     ConfigurationService configurationService = ServiceGenerator.getConfigurationService();
                     final Configuration configuration = new Configuration(configuracionAGuardar);
-                    configurationService.crearConfiguracion("Configuracion " + idConfiguracion,
+                    configurationService.crearConfiguracion(getString(R.string.configuracion) + idConfiguracion,
                             configuration.getMode(),
                             configuration.getIntensity(),
                             mainActivity.getUsuarioActual().getToken(),
@@ -471,7 +471,6 @@ public class MainFragment extends Fragment {
                                     try {
                                         JSONObject resJson = new JSONObject(bodyString[0]);
                                         if ((Boolean) resJson.get("success")) {
-                                            Toast.makeText(mainActivity, "JSON " + bodyString[0], Toast.LENGTH_SHORT).show();
                                             configuracionAGuardar.setSincronizado(true);
                                             try {
                                                 daoConfiguracion = mainActivity.getHelper().getConfiguracionDao();
@@ -489,7 +488,6 @@ public class MainFragment extends Fragment {
                                 public void failure(RetrofitError error) {
                                     try {
                                         bodyString[0] = new String(((TypedByteArray) error.getResponse().getBody()).getBytes());
-                                        Toast.makeText(getActivity(), "Res: " + bodyString[0], Toast.LENGTH_SHORT).show();
                                         configuracion.setSincronizado(false);
                                         daoConfiguracion = mainActivity.getHelper().getConfiguracionDao();
                                         daoConfiguracion.update(configuracionAGuardar);
@@ -509,7 +507,8 @@ public class MainFragment extends Fragment {
         protected void onPostExecute(Void result) {
             int idConfiguracion = configuracionAGuardar.getIdLocal();
             mainActivity.agregarConfiguracionFavoritaAlMenuLateral(configuracionAGuardar, true);
-            mostrarMensajeToast("Configuración " + idConfiguracion + " guardada.");
+            mostrarMensajeToast(mainActivity.getString(R.string.configuracion) + idConfiguracion
+                    + mainActivity.getString(R.string.guardada));
         }
     }
 
@@ -539,7 +538,6 @@ public class MainFragment extends Fragment {
                                     try {
                                         JSONObject resJson = new JSONObject(bodyString[0]);
                                         if ((Boolean) resJson.get("success")) {
-                                            Toast.makeText(mainActivity, "JSON " + bodyString[0], Toast.LENGTH_SHORT).show();
                                             configuracion.setSincronizado(true);
                                             try {
                                                 daoConfiguracion = mainActivity.getHelper().getConfiguracionDao();
@@ -557,7 +555,6 @@ public class MainFragment extends Fragment {
                                 public void failure(RetrofitError error) {
                                     try {
                                         bodyString[0] = new String(((TypedByteArray) error.getResponse().getBody()).getBytes());
-                                        Toast.makeText(getActivity(), "Res: " + bodyString[0], Toast.LENGTH_SHORT).show();
                                         configuracion.setSincronizado(false);
                                         daoConfiguracion = mainActivity.getHelper().getConfiguracionDao();
                                         daoConfiguracion.update(configuracion);
@@ -576,11 +573,12 @@ public class MainFragment extends Fragment {
         @Override
         protected void onPostExecute(Void result) {
             mainActivity.eliminaraConfiguracionFavoritaMenuLateral(configuracion.getIdLocal());
-            mostrarMensajeToast("Configuración " + configuracion.getIdLocal() + " eliminada.");
+            mostrarMensajeToast(getString(R.string.configuracion) + configuracion.getIdLocal()
+                    + mainActivity.getString(R.string.eliminada));
         }
     }
 
-    void mostrarMensaje(String s) {
+    void mostrarMensajeSnack(String s) {
         if (getView() != null) {
             Snackbar.make(getView(), s, Snackbar.LENGTH_LONG).show();
         }
@@ -588,6 +586,19 @@ public class MainFragment extends Fragment {
 
     void mostrarMensajeToast(String s) {
         Toast.makeText(getActivity(), s, Toast.LENGTH_SHORT).show();
+    }
+
+    private void mostrarAlertDialog(String t, String s) {
+        new AlertDialog.Builder(getActivity())
+                .setTitle(t)
+                .setMessage(s)
+                .setPositiveButton(getString(R.string.boton_aceptar), new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .setIcon(android.R.drawable.ic_dialog_info)
+                .show();
     }
 
 }
