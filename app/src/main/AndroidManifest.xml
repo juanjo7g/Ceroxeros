@@ -17,6 +17,14 @@
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id" />
+        <receiver
+            android:name="com.ceroxeros.receivers.NetworkChangeReceiver"
+            android:label="NetworkChangeReceiver">
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+                <action android:name="android.net.wifi.WIFI_STATE_CHANGED" />
+            </intent-filter>
+        </receiver>
 
         <activity
             android:name="com.ceroxeros.view.activity.MainActivity"
@@ -25,15 +33,18 @@
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name="com.ceroxeros.view.activity.BluetoothActivity"
             android:screenOrientation="portrait" />
-        <activity android:name="com.ceroxeros.view.activity.PairBluetoothActivity" />
-        <activity android:name="com.ceroxeros.view.activity.CrearUsuarioActivity"></activity>
+        <activity
+            android:name="com.ceroxeros.view.activity.PairBluetoothActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name="com.ceroxeros.view.activity.CrearUsuarioActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

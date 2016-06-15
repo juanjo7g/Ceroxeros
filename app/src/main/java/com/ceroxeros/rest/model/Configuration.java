@@ -32,6 +32,9 @@ public class Configuration {
             if (configuracion.getIdRemoto() != null) {
                 _id = configuracion.getIdRemoto();
             }
+            if (configuracion.getUsuario() != null) {
+                user_id = configuracion.getUsuario().getIdRemoto();
+            }
         }
     }
 
