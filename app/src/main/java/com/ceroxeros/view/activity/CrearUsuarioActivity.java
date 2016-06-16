@@ -68,10 +68,12 @@ public class CrearUsuarioActivity extends AppCompatActivity {
                 crearUsuario();
             }
         });
+        setTitle(getString(R.string.titulo_crear_usuario));
     }
 
     private void crearUsuario() {
-        final ProgressDialog progressDialog = ProgressDialog.show(this, null, "Creando usuario...", true, false);
+        final ProgressDialog progressDialog = ProgressDialog.show(this, null,
+                getString(R.string.mensaje_progreso_creando_usuario), true, false);
         User user = new User();
         UserService userService = ServiceGenerator.getUserService();
         final String[] bodyString = new String[1];
@@ -81,7 +83,6 @@ public class CrearUsuarioActivity extends AppCompatActivity {
         user.setPassword1(etContraseña.getText().toString());
         user.setPassword2(etContraseñaRep.getText().toString());
 
-        // TODO: VALIDAR USUARIO
         userService.crearUsuario(user.getName(),
                 user.getUsername(),
                 user.getPassword1(),
@@ -107,7 +108,13 @@ public class CrearUsuarioActivity extends AppCompatActivity {
                         try {
                             progressDialog.dismiss();
                             bodyString[0] = new String(((TypedByteArray) error.getResponse().getBody()).getBytes());
+                            JSONObject resJson = new JSONObject(bodyString[0]);
+                            if (resJson.getString("data") != null) {
+                                Toast.makeText(CrearUsuarioActivity.this, resJson.getString("data"), Toast.LENGTH_SHORT).show();
+                            }
                         } catch (NullPointerException e) {
+                            e.printStackTrace();
+                        } catch (JSONException e) {
                             e.printStackTrace();
                         }
                     }
@@ -118,12 +125,10 @@ public class CrearUsuarioActivity extends AppCompatActivity {
         try {
             Gson gson = new Gson();
             User user = gson.fromJson(userJson.toString(), User.class);
-            Toast.makeText(CrearUsuarioActivity.this, user.toString(), Toast.LENGTH_SHORT).show();
             Usuario usuario = new Usuario(user);
             dao = getHelper().getUsuarioDao();
             usuario.setIdLocal(1);
             dao.createOrUpdate(usuario);
-
         } catch (SQLException e) {
             e.printStackTrace();
         }

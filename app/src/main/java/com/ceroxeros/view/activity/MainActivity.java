@@ -179,7 +179,7 @@ public class MainActivity extends AppCompatActivity
         }
         if (mac != null) {
             address = mac;
-            //todo: iniciar conexion
+            //todo: iniciar conexion automaticamente al abrir la app
             // new ConnectBT().execute();
         }
     }

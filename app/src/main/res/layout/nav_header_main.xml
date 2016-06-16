@@ -23,7 +23,7 @@
         android:layout_height="wrap_content"
         android:paddingTop="@dimen/nav_header_vertical_spacing"
         android:id="@+id/textViewNombreNavHeader"
-        android:text="Ceroxeros - Inicie sesión"
+        android:text="@string/ceroxeros_inicia_sesion"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
     <TextView

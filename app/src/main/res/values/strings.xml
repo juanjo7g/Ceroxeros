@@ -46,4 +46,7 @@
     <string name="mensaje_emparejar_dispositivo">Selecciona el dispositivo que desea emparejar por primer vez y luego presiona el botón de atrás para retornar a la aplicación.</string>
     <string name="titulo_emparejar_dispositivo">Emparejar dispositivo por primer ver</string>
     <string name="boton_cancelar">Cancelar</string>
+    <string name="titulo_crear_usuario">Crear Usuario</string>
+    <string name="mensaje_progreso_creando_usuario">Creando usuario...</string>
+    <string name="ceroxeros_inicia_sesion">Ceroxeros - Inicia sesión</string>
 </resources>
