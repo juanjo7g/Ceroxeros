@@ -296,6 +296,8 @@ public class IniciarSesionFragment extends Fragment {
                 daoConfiguracion.delete(configuracion);
                 mainActivity.eliminaraConfiguracionFavoritaMenuLateral(configuracion.getIdLocal());
             }
+            daoConfiguracion.updateRaw("delete from 'configuracion';");
+            daoConfiguracion.updateRaw("delete from sqlite_sequence where name='configuracion';");
             gson = new Gson();
             for (int i = 0; i < resArrayJson.length(); i++) {
                 configuration = gson.fromJson(resArrayJson.get(i).toString(), Configuration.class);

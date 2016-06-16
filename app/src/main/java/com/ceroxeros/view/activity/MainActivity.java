@@ -260,12 +260,16 @@ public class MainActivity extends AppCompatActivity
         try {
             daoUsuario = getHelper().getUsuarioDao();
             daoConfiguracion = getHelper().getConfiguracionDao();
+
             listaConfiguraciones = daoConfiguracion.queryForAll();
             for (int i = 0; i < listaConfiguraciones.size(); i++) {
                 config = listaConfiguraciones.get(i);
-                config.setUsuario(null);
-                daoConfiguracion.update(config);
+                daoConfiguracion.delete(config);
+                eliminaraConfiguracionFavoritaMenuLateral(config.getIdLocal());
             }
+            daoConfiguracion.updateRaw("delete from 'configuracion';");
+            daoConfiguracion.updateRaw("delete from sqlite_sequence where name='configuracion';");
+
             Usuario usuario = getUsuarioActual();
             if (usuario != null) {
                 usuario.setToken(null);
