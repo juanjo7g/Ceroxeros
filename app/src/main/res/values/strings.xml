@@ -17,7 +17,7 @@
     <string name="facebook_app_id">1488888527803999</string>
     <string name="signed_in_fmt">Signed in as: %s</string>
     <string name="titulo_evaluar_configuracion">Evaluar Configuracion</string>
-    <string name="titulo_dialogo_calificar_configuracion">Califica la configuración actual:</string>
+    <string name="titulo_dialogo_calificar_configuracion">Califica la experiencia actual:</string>
     <string name="sugerencia">Sugerencia (Opcional):</string>
     <string name="mensaje_progreso_cargando_configuraciones">Cargando configuraciones favoritas</string>
     <string name="mensaje_error_cargando_configuraciones">Error cargando configuraciones favoritas</string>

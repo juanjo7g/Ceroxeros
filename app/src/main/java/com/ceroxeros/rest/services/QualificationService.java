@@ -16,5 +16,7 @@ public interface QualificationService {
                            @Field("intensity") Float intensity,
                            @Field("quantity") Float quantity,
                            @Field("feedback") String feedback,
+                           @Field("comfort") int comfort,
+                           @Field("satisfaction") int satisfaction,
                            Callback<Response> callback);
 }

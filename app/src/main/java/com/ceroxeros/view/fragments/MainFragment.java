@@ -402,6 +402,8 @@ public class MainFragment extends Fragment {
         Button btnEnviar = (Button) dialog.findViewById(R.id.buttonEnviar);
         final RatingBar rbCantidad = (RatingBar) dialog.findViewById(R.id.ratingBarCalificacion);
         final EditText etSugerencia = (EditText) dialog.findViewById(R.id.editTextSugerencia);
+        final SeekBar sbComodidad = (SeekBar) dialog.findViewById(R.id.seekbBarComodidad);
+        final SeekBar sbSatisfaccion = (SeekBar) dialog.findViewById(R.id.seekbBarSatisfaccion);
 
         btnCancelar.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -422,6 +424,8 @@ public class MainFragment extends Fragment {
                         configuracion.getIntensidad(),
                         rbCantidad.getRating(),
                         sugerencia,
+                        sbComodidad.getProgress(),
+                        sbSatisfaccion.getProgress(),
                         new Callback<Response>() {
                             @Override
                             public void success(Response response, Response response2) {
