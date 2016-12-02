@@ -84,47 +84,47 @@ public class IniciarSesionFragment extends Fragment {
 
         /** Inicio de sesion con Facebook. */
 
-        loginButtonFacebook = (LoginButton) view.findViewById(R.id.btnLoginFB);
-        loginButtonFacebook.setFragment(this);
-
-        loginButtonFacebook.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
-
-            @Override
-            public void onSuccess(final LoginResult loginResult) {
-                GraphRequest request = GraphRequest.newMeRequest(
-                        loginResult.getAccessToken(),
-                        new GraphRequest.GraphJSONObjectCallback() {
-                            @Override
-                            public void onCompleted(
-                                    JSONObject object,
-                                    GraphResponse response) {
-                                if (response.getError() != null) {
-
-                                } else {
-                                    iniciarSesionFb(loginResult.getAccessToken().getUserId(),
-                                            loginResult.getAccessToken().getToken(),
-                                            object.optString("first_name") + " " + object.optString("last_name"),
-                                            object.optString("email"));
-                                }
-                            }
-                        });
-                Bundle parameters = new Bundle();
-                parameters.putString("fields", "first_name,last_name,email");
-                request.setParameters(parameters);
-                request.executeAsync();
-
-            }
-
-            @Override
-            public void onCancel() {
-
-            }
-
-            @Override
-            public void onError(FacebookException error) {
-
-            }
-        });
+//        loginButtonFacebook = (LoginButton) view.findViewById(R.id.btnLoginFB);
+//        loginButtonFacebook.setFragment(this);
+//
+//        loginButtonFacebook.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+//
+//            @Override
+//            public void onSuccess(final LoginResult loginResult) {
+//                GraphRequest request = GraphRequest.newMeRequest(
+//                        loginResult.getAccessToken(),
+//                        new GraphRequest.GraphJSONObjectCallback() {
+//                            @Override
+//                            public void onCompleted(
+//                                    JSONObject object,
+//                                    GraphResponse response) {
+//                                if (response.getError() != null) {
+//
+//                                } else {
+//                                    iniciarSesionFb(loginResult.getAccessToken().getUserId(),
+//                                            loginResult.getAccessToken().getToken(),
+//                                            object.optString("first_name") + " " + object.optString("last_name"),
+//                                            object.optString("email"));
+//                                }
+//                            }
+//                        });
+//                Bundle parameters = new Bundle();
+//                parameters.putString("fields", "first_name,last_name,email");
+//                request.setParameters(parameters);
+//                request.executeAsync();
+//
+//            }
+//
+//            @Override
+//            public void onCancel() {
+//
+//            }
+//
+//            @Override
+//            public void onError(FacebookException error) {
+//
+//            }
+//        });
 
 
         buttonCrearUsuario = (Button) view.findViewById(R.id.buttonCrearUsuario);

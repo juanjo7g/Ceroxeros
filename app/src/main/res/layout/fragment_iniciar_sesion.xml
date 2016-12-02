@@ -56,16 +56,16 @@
             android:textColor="@color/colorWhite" />
 
 
-        <com.facebook.login.widget.LoginButton
-            android:id="@+id/btnLoginFB"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_below="@+id/btnFragmentIniciarSesionIniciar"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_alignRight="@+id/btnFragmentIniciarSesionIniciar"
-            android:layout_alignEnd="@+id/btnFragmentIniciarSesionIniciar" />
+        <!--<com.facebook.login.widget.LoginButton-->
+            <!--android:id="@+id/btnLoginFB"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_marginTop="10dp"-->
+            <!--android:layout_below="@+id/btnFragmentIniciarSesionIniciar"-->
+            <!--android:layout_alignParentLeft="true"-->
+            <!--android:layout_alignParentStart="true"-->
+            <!--android:layout_alignRight="@+id/btnFragmentIniciarSesionIniciar"-->
+            <!--android:layout_alignEnd="@+id/btnFragmentIniciarSesionIniciar" />-->
 
         <Button
             android:id="@+id/buttonCrearUsuario"
@@ -73,7 +73,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:layout_below="@+id/btnLoginFB"
+            android:layout_below="@+id/btnFragmentIniciarSesionIniciar"
             android:layout_marginTop="10dp"
             android:background="@color/colorPrimaryDark"
             android:text="Crear Usuario"
